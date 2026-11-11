@@ -1,0 +1,19 @@
+{
+  "name": "ctrl-predicts-agent",
+  "version": "1.0.0",
+  "description": "Ctrl Predicts: API server plus AI agent (article writer and market resolver) on NEAR testnet",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "seed": "node scripts/seed.js",
+    "models": "node scripts/llm-test.js",
+    "article": "node scripts/article.js",
+    "resolve": "node scripts/resolve.js"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.10",
+    "express": "^5.3.0",
+    "near-api-js": "^7.5.2"
+  }
+}
