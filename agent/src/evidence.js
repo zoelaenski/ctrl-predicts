@@ -34,6 +34,43 @@ export async function cryptoPrice(coinId) {
   };
 }
 
+/** Price of a coin at (or nearest to) a past moment, from CoinGecko's historical range data. */
+export async function cryptoPriceAt(coinId, atMs) {
+  const from = Math.floor((atMs - 30 * 60 * 1000) / 1000);
+  const to = Math.ceil((atMs + 30 * 60 * 1000) / 1000);
+  const url = `https://api.coingecko.com/api/v3/coins/${encodeURIComponent(coinId)}/market_chart/range?vs_currency=usd&from=${from}&to=${to}`;
+  const res = await fetch(url, { headers: { 'User-Agent': 'ctrl-predicts-agent' } });
+  if (!res.ok) throw new Error(`CoinGecko range responded ${res.status}`);
+  const prices = (await res.json()).prices || [];
+  if (!prices.length) throw new Error('CoinGecko returned no price points around the close time');
+  let best = prices[0];
+  for (const p of prices) if (Math.abs(p[0] - atMs) < Math.abs(best[0] - atMs)) best = p;
+  return {
+    coin: coinId,
+    price_usd: best[1],
+    observed_at: new Date(best[0]).toISOString(),
+    source: 'CoinGecko market_chart/range',
+    url: `https://www.coingecko.com/en/coins/${coinId}`,
+  };
+}
+
+/** "Will NEAR trade above $3.84 ..." -> { direction: 'above', threshold: 3.84 } (or null if not a simple price question). */
+export function parseThreshold(question) {
+  const m = /\b(above|over|below|under)\s+\$?\s*([\d,]+(?:\.\d+)?)/i.exec(question);
+  if (!m) return null;
+  const word = m[1].toLowerCase();
+  return {
+    direction: word === 'above' || word === 'over' ? 'above' : 'below',
+    threshold: Number(m[2].replace(/,/g, '')),
+  };
+}
+
+/** Fixed rule: YES when the price condition is met, otherwise NO. */
+export function decideByThreshold(direction, price, threshold) {
+  const met = direction === 'above' ? price > threshold : price < threshold;
+  return met ? 'YES' : 'NO';
+}
+
 const decode = (s) =>
   s
     .replace(/<!\[CDATA\[|\]\]>/g, '')

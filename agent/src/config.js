@@ -10,7 +10,7 @@ export const cfg = {
   resolverKey: process.env.RESOLVER_KEY,
 
   // NEAR AI Cloud (OpenAI-compatible)
-  apiKey: process.env.LLM_API_KEY || process.env.NEARAI_API_KEY,
+  apiKey: process.env.NEARAI_API_KEY,
   llmBase: process.env.LLM_BASE_URL || 'https://cloud-api.near.ai/v1',
   model: process.env.LLM_MODEL || 'zai-org/GLM-5.1-FP8',
 
