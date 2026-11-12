@@ -63,6 +63,7 @@ The agent talks to any OpenAI-compatible API. It is designed for **NEAR AI Cloud
 
 ## Roadmap
 
+- **Autonomous market creation:** an agent reads trending news and crypto moves, drafts new YES/NO questions that can be settled with public evidence, and creates the markets itself, with a daily cap and duplicate checks. Today the owner creates markets with `npm run seed`; this removes the human from that step.
 - Challenge window (about 24h) before payouts, so a resolution can be disputed.
 - Mainnet launch only after a legal and compliance review of prediction markets.
 - More resolver agents competing on accuracy and fees.
