@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CTRL: prediction markets on NEAR</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;700&display=swap">
+<style>
+:root{--bg:#fff;--s:#F4F4F4;--ln:#DDD;--bd:#767676;--tx:#000;--mu:#555;--gt:#006B43;--no:#000;--onno:#fff;--g:#00EC97;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#000;--s:#111;--ln:#333;--bd:#6B6B6B;--tx:#fff;--mu:#B3B3B3;--gt:#00EC97;--no:#fff;--onno:#000}}
+:root[data-theme="dark"]{--bg:#000;--s:#111;--ln:#333;--bd:#6B6B6B;--tx:#fff;--mu:#B3B3B3;--gt:#00EC97;--no:#fff;--onno:#000}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*:before,*:after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 "Instrument Sans",system-ui,sans-serif;font-variant-numeric:tabular-nums}
+h1,h2,h3,p,ul{margin:0}a{color:inherit}h3 a{text-decoration:none}
+.w{max-width:1100px;margin:0 auto;padding:20px 16px 48px}
+.mu{color:var(--mu);font-size:13px}.gt{color:var(--gt)}
+.r{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sp{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.hd{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:28px}
+.nav a,.t{min-height:44px;display:inline-flex;align-items:center;padding:0 6px;text-decoration:none;color:var(--mu);border:0;border-bottom:3px solid transparent;border-radius:0;font-weight:700;background:none;cursor:pointer}
+.nav a[aria-current],.t[aria-current]{color:var(--tx);border-bottom-color:var(--g)}
+.env{border:1px solid var(--bd);border-radius:6px;padding:2px 8px;font-size:13px;color:var(--mu)}
+button,input,.btn{font:700 14px "Instrument Sans",system-ui,sans-serif;min-height:44px;border-radius:8px;cursor:pointer}
+.sc{background:none;color:var(--tx);border:1px solid var(--bd);padding:0 16px}
+.yes{background:var(--g);color:#000;border:0;padding:0 18px}
+.no{background:var(--no);color:var(--onno);border:0;padding:0 18px}
+a.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.c{background:var(--s);border:1px solid var(--ln);border-radius:12px;padding:16px}
+.g3{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
+.bar{display:flex;height:8px;border-radius:4px;overflow:hidden}.bar i{display:block}
+input{background:var(--bg);color:var(--tx);border:1px solid var(--bd);padding:0 12px;cursor:text}
+:focus-visible{outline:2px solid var(--tx);outline-offset:2px}
+.sel{outline:2px solid var(--tx);outline-offset:2px}
+.k{border:1px solid currentColor;border-radius:4px;padding:1px 8px;font-size:13px;font-weight:700}
+.two{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start}
+.col{display:flex;flex-direction:column;gap:12px}
+@media(max-width:820px){.two{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:no-preference){.bar i{transition:width .3s}}
+</style>
+</head>
+<body>
+<div class="w">
+<header class="hd">
+<div class="r" style="gap:24px"><a href="#markets" style="display:flex;align-items:center;gap:8px;text-decoration:none;font-size:20px;font-weight:700;min-height:44px"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="9" fill="none" stroke="#00EC97" stroke-width="3"/></svg>CTRL</a>
+<nav class="nav r" aria-label="Main"><a href="#markets" id="n1">Markets</a><a href="#portfolio" id="n2">Portfolio</a><a href="#stats" id="n3">Stats</a></nav></div>
+<div class="r"><span class="env">Testnet: no real funds</span><span class="mu" id="bl"></span><button class="sc" id="conn">Connect wallet</button></div>
+</header>
+<main id="app"><p class="mu">Loading…</p></main>
+<p class="mu" id="live" role="status" style="margin-top:20px;min-height:20px"></p>
+<p class="mu" style="margin-top:8px" id="foot"></p>
+</div>
+<script type="module">
+/* ---------- config ---------- */
+const CONTRACT = 'ctrlpredicts.testnet';
+const RPC = 'https://test.rpc.fastnear.com';
+const EXPLORER = 'https://testnet.nearblocks.io';
+const NEAR_CONNECT_URL = 'https://esm.sh/@hot-labs/near-connect@0.11.4';
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+  del(k) { try { localStorage.removeItem(k); } catch {} },
+};
+const qs = new URLSearchParams(location.search);
+if (qs.get('api')) store.set('ctrl_api', qs.get('api'));
+const API = (qs.get('api') || store.get('ctrl_api') || 'http://localhost:3001').replace(/\/$/, '');
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id), app = $('app');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const E24 = BigInt('1000000000000000000000000'), E18 = BigInt('1000000000000000000');
+const toNear = y => Number(BigInt(y || '0') / E18) / 1e6;                 // yocto string -> NEAR number
+const toYocto = s => { const [i, fr = ''] = String(s).trim().split('.'); return (BigInt(i || '0') * E24 + BigInt((fr + '0'.repeat(24)).slice(0, 24))).toString(); };
+const f = n => Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 });
+const cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
+const when = ms => new Date(ms).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+const safeUrl = u => /^https?:\/\//i.test(u) ? esc(u) : null;
+const live = t => { $('live').textContent = t; };
+const liveHtml = t => { $('live').innerHTML = t; };
+const inline = s => s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+function md(t) {
+  let out = '', ul = false;
+  for (const ln of esc(t).split('\n')) {
+    const li = /^\s*[-*]\s+(.*)/.exec(ln);
+    if (li) { if (!ul) { out += '<ul class="col" style="padding-left:18px;gap:4px">'; ul = true; } out += '<li>' + inline(li[1]) + '</li>'; continue; }
+    if (ul) { out += '</ul>'; ul = false; }
+    const h = /^#{1,6}\s+(.*)/.exec(ln);
+    if (h) out += '<h3 style="font-size:16px;margin-top:6px">' + inline(h[1]) + '</h3>';
+    else if (ln.trim()) out += '<p>' + inline(ln) + '</p>';
+  }
+  return out + (ul ? '</ul>' : '');
+}
+const sourcesList = (src = []) => src.length ? '<ul class="col" style="padding-left:18px;gap:6px">' + src.map(s => { const u = safeUrl(s.url); return '<li>' + (u ? `<a href="${u}" target="_blank" rel="noopener noreferrer">${esc(s.title)}</a>` : esc(s.title)) + '</li>'; }).join('') + '</ul>' : '<p class="mu">No sources recorded.</p>';
+
+/* ---------- state ---------- */
+const S = { rows: null, stats: null, err: null, account: null, wallet: null, connector: null, bal: null, positions: null, side: 'YES', cat: 'All', q: '', detail: null, detailId: null };
+const fee = () => (S.stats ? S.stats.fee_bps : 200) / 10000;
+
+async function api(path) {
+  const r = await fetch(API + path);
+  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'API ' + r.status);
+  return r.json();
+}
+async function loadList() {
+  try {
+    const [rows, stats] = await Promise.all([api('/api/entries'), api('/api/stats')]);
+    S.rows = rows.map(r => ({ m: norm(r.market), article: r.article })); S.stats = stats; S.err = null;
+  } catch (e) { S.err = e.message || String(e); }
+}
+function norm(m) {
+  return { id: m.id, q: m.question, cat: m.category, closes: m.closes_at_ms, st: m.status, out: m.outcome, refund: m.refund,
+    yy: m.yes_pool, nn: m.no_pool, y: toNear(m.yes_pool), n: toNear(m.no_pool), feePaid: m.fee_paid, hash: m.evidence_hash };
+}
+async function loadBalance() {
+  S.bal = null;
+  if (!S.account) return;
+  try {
+    const r = await fetch(RPC, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'query', params: { request_type: 'view_account', finality: 'final', account_id: S.account } }) });
+    S.bal = toNear((await r.json()).result.amount);
+  } catch { S.bal = null; }
+}
+async function loadPositions() {
+  S.positions = null;
+  if (!S.account) return;
+  try { S.positions = await api('/api/positions/' + encodeURIComponent(S.account)); } catch (e) { S.positions = []; live('Could not load your positions: ' + e.message); }
+}
+
+/* ---------- wallet ---------- */
+async function getConnector() {
+  if (S.connector) return S.connector;
+  const mod = window.__nearConnectStub || await import(NEAR_CONNECT_URL);
+  S.connector = new mod.NearConnector({ network: 'testnet' });
+  S.connector.on?.('wallet:signOut', () => { S.wallet = null; S.account = null; store.del('ctrl_wallet'); hdr(); route(); });
+  return S.connector;
+}
+async function setWallet(w) {
+  S.wallet = w;
+  const a = await w.getAccounts();
+  S.account = a[0]?.accountId || null;
+  store.set('ctrl_wallet', '1');
+  await Promise.all([loadBalance(), loadPositions()]);
+  hdr();
+}
+async function connect() {
+  try { live('Opening wallet…'); const c = await getConnector(); await setWallet(await c.connect()); live('Wallet connected: ' + S.account); route(); }
+  catch (e) { live('Wallet connection failed: ' + (e.message || e)); }
+}
+async function disconnect() {
+  try { const c = await getConnector(); await c.disconnect(S.wallet); } catch {}
+  S.wallet = null; S.account = null; S.bal = null; S.positions = null; store.del('ctrl_wallet'); hdr(); route();
+}
+async function restoreWallet() {
+  if (!store.get('ctrl_wallet')) return;
+  try { const c = await getConnector(); const w = await c.wallet(); if (w) { await setWallet(w); route(); } } catch {}
+}
+async function callContract(methodName, args, depositYocto) {
+  if (!S.wallet) throw new Error('Connect your wallet first.');
+  const res = await S.wallet.signAndSendTransaction({
+    receiverId: CONTRACT,
+    actions: [{ type: 'FunctionCall', params: { methodName, args, gas: '30000000000000', deposit: depositYocto } }],
+  });
+  return res?.transaction?.hash || res?.transaction_outcome?.id || null;
+}
+const txLink = h => h ? ` <a href="${EXPLORER}/txns/${esc(h)}" target="_blank" rel="noopener noreferrer">View transaction</a>` : '';
+
+/* ---------- math ---------- */
+const total = m => m.y + m.n;
+const pct = m => total(m) > 0 ? Math.round(m.y / total(m) * 100) : 50;
+const est = (m, s, a) => a * (1 - fee()) * (total(m) + a) / ((s === 'YES' ? m.y : m.n) + a);
+function payoutOf(m, pos) {              // exact payout in yocto (BigInt) for a position, mirrors the contract
+  const y = BigInt(pos.yes), n = BigInt(pos.no);
+  if (m.refund) return y + n;
+  const stake = m.out === 'YES' ? y : n, win = BigInt(m.out === 'YES' ? m.yy : m.nn);
+  if (stake === BigInt(0) || win === BigInt(0)) return BigInt(0);
+  return stake * (BigInt(m.yy) + BigInt(m.nn) - BigInt(m.feePaid)) / win;
+}
+const bar = p => `<div class="bar" role="img" aria-label="${p} percent yes"><i style="width:${p}%;background:var(--g)"></i><i style="flex:1;background:var(--no)"></i></div>`;
+const stLabel = m => m.st === 'open' ? 'Closes ' + when(m.closes) : m.st === 'closed' ? 'Closed, awaiting AI agent' : 'Resolved ' + m.out;
+
+/* ---------- views ---------- */
+const card = r => {
+  const m = r.m, p = pct(m), o = m.st === 'open';
+  return `<div class="c col" style="gap:14px"><div class="sp"><span class="mu">${esc(cap(m.cat))}</span><strong>${esc(stLabel(m))}</strong></div>
+<h3 style="font-size:18px;line-height:1.3;min-height:70px"><a href="#market-${m.id}">${esc(m.q)}</a></h3>
+<div class="r" style="gap:8px;align-items:baseline"><strong class="gt" style="font-size:34px;line-height:1">${total(m) > 0 ? p + '%' : '–'}</strong><span class="mu">${total(m) > 0 ? 'chance of yes' : 'no bets yet'}</span></div>${bar(p)}
+<div class="sp"><span class="mu">Pool ${f(total(m))} NEAR</span><span class="mu">Resolved by AI agent</span></div>
+${o ? `<div class="r"><a class="btn yes" data-side="YES" href="#market-${m.id}" style="flex:1">Yes</a><a class="btn no" data-side="NO" href="#market-${m.id}" style="flex:1">No</a></div>` : `<a class="btn sc" href="#market-${m.id}">${m.st === 'resolved' ? 'View resolution' : 'View market'}</a>`}</div>`;
+};
+const grid = () => {
+  const rows = (S.rows || []).filter(r => (S.cat === 'All' || r.m.cat === S.cat) && r.m.q.toLowerCase().includes(S.q));
+  return rows.map(card).join('') || '<p class="mu">No markets match. Try another category or search.</p>';
+};
+function errPanel() {
+  return `<div class="c col"><h2 style="font-size:20px">Can't reach the Ctrl Predicts API</h2><p class="mu">Tried ${esc(API)}. Error: ${esc(S.err)}</p><p class="mu">Start the API (<code>npm start</code> in the agent folder) or open this page with <code>?api=https://your-api-address</code>.</p><button class="sc" id="retry" style="align-self:flex-start">Try again</button></div>`;
+}
+function home() {
+  if (S.err && !S.rows) { app.innerHTML = errPanel(); return; }
+  if (!S.rows) { app.innerHTML = '<p class="mu">Loading markets…</p>'; return; }
+  const cats = ['All', ...new Set(['crypto', 'entertainment', 'sports', 'other', ...S.rows.map(r => r.m.cat)])];
+  app.innerHTML = `<h1 style="font-size:clamp(30px,5vw,44px);line-height:1.1">Predict anything.</h1><p class="mu" style="font-size:15px;margin:8px 0 24px">Pick YES or NO. Winners split the pool. An AI agent resolves each market and shows its evidence. Everything runs on NEAR testnet.</p>
+<div class="sp" style="border-bottom:1px solid var(--ln);margin-bottom:20px;flex-wrap:wrap"><div class="r" style="gap:12px">${cats.map(c => `<button class="t" data-cat="${esc(c)}"${c === S.cat ? ' aria-current="true"' : ''}>${esc(cap(c))}</button>`).join('')}</div>
+<label for="q" style="position:absolute;left:-9999px">Search markets</label><input id="q" type="search" placeholder="Search markets" style="width:240px;max-width:100%;margin-bottom:6px"></div><div class="g3" id="grid">${grid()}</div>`;
+  $('q').value = S.q;
+}
+const betPanel = m => `<div class="c col"><div class="r"><button class="yes" id="sy" aria-pressed="true" style="flex:1"></button><button class="no" id="sn" aria-pressed="false" style="flex:1"></button></div>
+<label class="mu" for="amt">You pay (NEAR)</label><input id="amt" inputmode="decimal" value="1" aria-describedby="err"><span class="mu">${S.account ? 'Balance ' + (S.bal == null ? '…' : f(S.bal)) + ' NEAR' : 'Connect a testnet wallet to bet'}</span>
+<div class="col" id="quote" style="gap:6px"></div><button id="go" style="min-height:48px"></button><p class="mu" id="err" role="alert"></p>
+<p class="mu">The payout is an estimate and changes as more bets come in. If nobody bets on the other side, you get your stake back.</p></div>`;
+function resPanel(m, res) {
+  if (!res) return `<div class="c col"><h2 style="font-size:22px">Resolved ${esc(m.out)}</h2><p class="mu">The evidence is still loading.</p></div>`;
+  const d = res.data, rule = res.method === 'rule';
+  return `<div class="c col" style="gap:14px"><span class="env" style="align-self:flex-start">${rule ? 'Settled by a fixed rule on price data' : 'Resolved by AI agent'}</span>
+<h2 style="font-size:24px">Outcome: ${esc(res.outcome)}</h2><p>${esc(res.reasoning)}</p>
+${d ? `<p class="mu">Price used: $${esc(f(d.price_usd))} at ${esc(new Date(d.observed_at).toUTCString())} (${esc(d.source)})</p>` : ''}
+<p class="mu">Sources</p>${sourcesList(res.sources)}
+<p class="mu">Evidence hash recorded on-chain: <code style="word-break:break-all">${esc(res.evidence_hash)}</code></p>
+<p class="mu">Resolved ${esc(new Date(res.resolved_at).toUTCString())}. Fee taken: ${f(toNear(m.feePaid))} NEAR.</p></div>`;
+}
+function claimBox(m) {
+  if (!S.account) return '<div class="c col"><p>Connect your wallet to see if you won.</p></div>';
+  const pos = (S.positions || []).find(p => p.market_id === m.id);
+  if (!pos) return '<div class="c col"><p class="mu">You have no position in this market.</p></div>';
+  const pay = payoutOf(m, pos);
+  if (pos.claimed) return '<div class="c col"><p class="mu">You already claimed your winnings.</p></div>';
+  if (pay === BigInt(0)) return '<div class="c col"><p class="mu">Your side did not win this market.</p></div>';
+  return `<div class="c col"><h3>You won ${f(toNear(pay.toString()))} NEAR</h3><button class="yes" id="claim" data-id="${m.id}" style="min-height:48px">Claim winnings</button><p class="mu" id="err" role="alert"></p></div>`;
+}
+async function detail(id) {
+  const r = (S.rows || []).find(x => x.m.id === id);
+  if (!r && S.err) { app.innerHTML = errPanel(); return; }
+  app.innerHTML = '<p class="mu">Loading market…</p>';
+  let d;
+  try { d = await api('/api/entries/' + id); } catch (e) { app.innerHTML = `<p><a href="#markets" class="mu">Back to markets</a></p><p>Could not load this market: ${esc(e.message)}</p>`; return; }
+  if (location.hash.slice(1) !== 'market-' + id) return;
+  const m = norm(d.market), a = d.article; S.detail = { m, a, res: d.resolution }; S.detailId = id;
+  const p = pct(m), o = m.st === 'open';
+  if (S.positions == null && S.account) await loadPositions();
+  const articleHtml = a ? `<div class="c col" style="gap:10px"><div class="sp"><h3 style="font-size:18px">${esc(a.title)}</h3><span class="env">AI-written</span></div><p>${esc(a.summary)}</p>${md(a.body_md)}<p class="mu">Sources</p>${sourcesList(a.sources)}<p class="mu">Written ${esc(new Date(a.updated_at).toUTCString())} by ${esc(a.model)}</p></div>` : '<div class="c"><p class="mu">The AI agent is still writing this entry. Check back in a minute.</p></div>';
+  const side = o ? betPanel(m) : m.st === 'resolved' ? resPanel(m, d.resolution) + claimBox(m) : '<div class="c col"><h2 style="font-size:22px">Betting is closed</h2><p class="mu">The AI agent is gathering evidence and will resolve this market shortly. This page updates when it does.</p></div>';
+  app.innerHTML = `<p><a href="#markets" class="mu">Back to markets</a></p><div class="two" style="margin-top:12px"><div class="col" style="gap:14px;min-width:0">
+<div class="r"><span class="mu">${esc(cap(m.cat))}</span><strong>${esc(stLabel(m))}</strong></div><h1 style="font-size:clamp(24px,4vw,32px);line-height:1.2">${esc(m.q)}</h1>
+<div class="c col" style="gap:10px"><div class="sp"><strong style="font-size:30px">${total(m) > 0 ? p + '% YES' : 'No bets yet'}</strong><span class="mu">Market odds</span></div>${bar(p)}<div class="sp"><span>YES pool <strong class="gt">${f(m.y)} NEAR</strong></span><span>NO pool <strong>${f(m.n)} NEAR</strong></span></div></div>
+${articleHtml}</div><div class="col">${side}</div></div>`;
+  if (o) quote();
+}
+function quote() {
+  const m = S.detail?.m; if (!m || m.st !== 'open' || !$('amt')) return;
+  const a = parseFloat($('amt').value), y = S.side === 'YES', ok = a >= 0.1 && (S.bal == null || a <= S.bal);
+  $('sy').classList.toggle('sel', y); $('sn').classList.toggle('sel', !y);
+  $('sy').textContent = (y ? '✓ ' : '') + 'Yes'; $('sn').textContent = (y ? '' : '✓ ') + 'No';
+  $('sy').setAttribute('aria-pressed', y); $('sn').setAttribute('aria-pressed', !y); $('err').textContent = '';
+  $('quote').innerHTML = ok ? `<div class="sp"><span class="mu">Fee</span><span>${f(fee() * 100)}% of the pool at resolution</span></div><div class="sp"><span class="mu">${S.side} pool after your bet</span><span>${f((y ? m.y : m.n) + a)} NEAR</span></div><div class="sp"><span>If ${S.side} wins you get about</span><strong>${f(est(m, S.side, a))} NEAR</strong></div>` : '<p class="mu">Enter an amount of at least 0.1 NEAR, within your balance.</p>';
+  $('go').textContent = S.account ? 'Place ' + S.side + ' bet for ' + (ok ? f(a) : '…') + ' NEAR' : 'Connect wallet to bet'; $('go').className = y ? 'yes' : 'no';
+}
+async function place() {
+  if (!S.account) { await connect(); return; }
+  const m = S.detail.m, a = parseFloat($('amt').value);
+  if (!(a >= 0.1)) { $('err').textContent = 'Enter at least 0.1 NEAR.'; return; }
+  if (S.bal != null && a > S.bal) { $('err').textContent = 'Not enough balance for this bet.'; return; }
+  try {
+    live('Waiting for wallet approval…');
+    const h = await callContract('bet', { market_id: m.id, side: S.side }, toYocto($('amt').value));
+    await Promise.all([loadList(), loadBalance(), loadPositions()]); hdr();
+    await detail(m.id); liveHtml('Bet placed: ' + f(a) + ' NEAR on ' + S.side + '.' + txLink(h));
+  } catch (e) { live('Bet failed: ' + (e.message || e)); }
+}
+async function claim(id) {
+  try {
+    live('Waiting for wallet approval…');
+    const h = await callContract('claim', { market_id: Number(id) }, '0');
+    await Promise.all([loadBalance(), loadPositions()]); hdr();
+    await detail(Number(id)); liveHtml('Winnings claimed.' + txLink(h));
+  } catch (e) { live('Claim failed: ' + (e.message || e)); }
+}
+async function port() {
+  if (S.err && !S.rows) { app.innerHTML = errPanel(); return; }
+  if (!S.account) { app.innerHTML = '<h1 style="font-size:clamp(28px,4vw,36px)">Portfolio</h1><p class="mu" style="margin-top:12px">Connect your wallet to see your positions.</p>'; return; }
+  await loadPositions();
+  const rows = (S.positions || []).map(p => {
+    const r = (S.rows || []).find(x => x.m.id === p.market_id); if (!r) return '';
+    const m = r.m, y = toNear(p.yes), n = toNear(p.no), sideTxt = [y > 0 ? 'YES ' + f(y) : '', n > 0 ? 'NO ' + f(n) : ''].filter(Boolean).join(' / ');
+    let status = m.st === 'open' ? 'Open, ' + stLabel(m).toLowerCase() : m.st === 'closed' ? 'Awaiting resolution' : 'Resolved ' + m.out, pay = '';
+    if (m.st === 'resolved') {
+      const w = payoutOf(m, p);
+      pay = p.claimed ? 'Claimed' : w > BigInt(0) ? `<button class="yes" data-claim="${m.id}">Claim ${f(toNear(w.toString()))} NEAR</button>` : 'Lost';
+    }
+    return `<div class="c sp"><div><a href="#market-${m.id}"><strong>${esc(m.q)}</strong></a><p class="mu">${esc(sideTxt)} NEAR staked. ${esc(status)}</p></div><div style="text-align:right">${pay}</div></div>`;
+  }).join('');
+  app.innerHTML = `<h1 style="font-size:clamp(28px,4vw,36px)">Portfolio</h1><div class="g3" style="margin:20px 0"><div class="c"><span class="mu">Account</span><h2 style="font-size:20px;word-break:break-all">${esc(S.account)}</h2></div><div class="c"><span class="mu">Balance</span><h2 style="font-size:30px">${S.bal == null ? '…' : f(S.bal)} NEAR</h2></div></div><h2 style="font-size:18px;margin-bottom:12px">Your positions</h2><div class="col">${rows || '<p class="mu">No positions yet. <a href="#markets">Browse markets</a> and place your first bet.</p>'}</div>`;
+}
+function statsView() {
+  if (S.err && !S.rows) { app.innerHTML = errPanel(); return; }
+  const s = S.stats; if (!s) { app.innerHTML = '<p class="mu">Loading…</p>'; return; }
+  const tile = (k, v) => `<div class="c"><span class="mu">${k}</span><h2 style="font-size:28px">${v}</h2></div>`;
+  app.innerHTML = `<h1 style="font-size:clamp(28px,4vw,36px)">Stats</h1><p class="mu" style="margin:8px 0 20px">How the platform earns. When a market resolves, ${f(s.fee_bps / 100)}% of the pool is taken as a fee: 70% to the project treasury and 30% to the AI resolver agent, which pays for its own work.</p>
+<div class="g3">${tile('Markets', s.markets_total)}${tile('Total volume', f(toNear(s.total_volume)) + ' NEAR')}${tile('Fees collected', f(toNear(s.fees_collected)) + ' NEAR')}${tile('Treasury', f(toNear(s.treasury_balance)) + ' NEAR')}${tile('Resolver agent earned', f(toNear(s.resolver_earned)) + ' NEAR')}</div>
+<p class="mu" style="margin-top:16px">Contract: <a href="${EXPLORER}/address/${CONTRACT}" target="_blank" rel="noopener noreferrer">${CONTRACT}</a></p>`;
+}
+function hdr() {
+  const h = location.hash.slice(1) || 'markets';
+  $('n1').toggleAttribute('aria-current', h !== 'portfolio' && h !== 'stats'); $('n2').toggleAttribute('aria-current', h === 'portfolio'); $('n3').toggleAttribute('aria-current', h === 'stats');
+  $('bl').textContent = S.account && S.bal != null ? f(S.bal) + ' NEAR' : '';
+  $('conn').textContent = S.account || 'Connect wallet';
+  $('conn').title = S.account ? 'Click to disconnect' : '';
+}
+function route() {
+  const h = location.hash.slice(1) || 'markets'; hdr();
+  const mm = /^market-(\d+)$/.exec(h);
+  if (mm) detail(Number(mm[1])); else if (h === 'portfolio') port(); else if (h === 'stats') statsView(); else home();
+  window.scrollTo(0, 0);
+}
+addEventListener('hashchange', route);
+document.addEventListener('click', e => {
+  const t = e.target.closest('button,a'); if (!t) return;
+  if (t.dataset.side) S.side = t.dataset.side;
+  if (t.dataset.cat) { S.cat = t.dataset.cat; home(); return; }
+  if (t.id === 'sy' || t.id === 'sn') { S.side = t.id === 'sy' ? 'YES' : 'NO'; quote(); }
+  else if (t.id === 'go') place();
+  else if (t.id === 'claim') claim(t.dataset.id);
+  else if (t.dataset.claim) claim(t.dataset.claim);
+  else if (t.id === 'retry') { S.err = null; loadList().then(route); }
+  else if (t.id === 'conn') { S.account ? disconnect() : connect(); }
+});
+document.addEventListener('input', e => {
+  if (e.target.id === 'amt') quote();
+  if (e.target.id === 'q') { S.q = e.target.value.toLowerCase(); $('grid').innerHTML = grid(); }
+});
+$('foot').innerHTML = `Contract <a href="${EXPLORER}/address/${CONTRACT}" target="_blank" rel="noopener noreferrer">${CONTRACT}</a> on NEAR testnet. API: ${esc(API)}`;
+hdr();
+await loadList(); route();
+restoreWallet();
+setInterval(async () => { const h = location.hash.slice(1) || 'markets'; if (h === 'markets' && document.activeElement?.id !== 'q') { await loadList(); if (S.rows) home(); } }, 30000);
+</script>
+</body>
+</html>

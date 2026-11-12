@@ -1,6 +1,6 @@
 import express from 'express';
 import { cfg } from './config.js';
-import { getMarkets, getMarket, getStats } from './chain.js';
+import { getMarkets, getMarket, getStats, view } from './chain.js';
 import { allEntries, getEntry } from './store.js';
 import { tick } from './loop.js';
 
@@ -57,6 +57,20 @@ app.get(
 app.get(
   '/api/stats',
   wrap(async (req, res) => res.json(await getStats())),
+);
+
+// A wallet's positions across all markets (used by the Portfolio page and the Claim button)
+app.get(
+  '/api/positions/:account',
+  wrap(async (req, res) => {
+    const markets = await getMarkets();
+    const out = [];
+    for (const m of markets) {
+      const p = await view('get_position', { market_id: m.id, account_id: req.params.account });
+      if (p.yes !== '0' || p.no !== '0') out.push({ market_id: m.id, ...p });
+    }
+    res.json(out);
+  }),
 );
 
 app.listen(cfg.port, () => {
