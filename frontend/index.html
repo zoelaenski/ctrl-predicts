@@ -79,7 +79,7 @@ const store = {
 };
 const qs = new URLSearchParams(location.search);
 if (qs.get('api')) store.set('ctrl_api', qs.get('api'));
-const API = (qs.get('api') || store.get('ctrl_api') || 'http://localhost:3001').replace(/\/$/, '');
+const API = (qs.get('api') || store.get('ctrl_api') || 'https://ctrl-predicts-api.onrender.com').replace(/\/$/, '');
 
 /* ---------- helpers ---------- */
 const $ = id => document.getElementById(id), app = $('app');
