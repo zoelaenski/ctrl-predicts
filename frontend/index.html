@@ -10,119 +10,159 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 26 26%27%3E%3Crect width=%2726%27 height=%2726%27 rx=%276%27 fill=%27%23000%27/%3E%3Cpath d=%27M18.6 7.4A6.6 6.6 0 1 0 18.6 18.6%27 transform=%27translate(1.3 0) scale(.95)%27 fill=%27none%27 stroke=%27%2300EC97%27 stroke-width=%273.2%27 stroke-linecap=%27round%27/%3E%3Ccircle cx=%2721.5%27 cy=%2713%27 r=%271.7%27 fill=%27%23fff%27/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;700&display=swap">
 <style>
-:root{--bg:#fff;--s:#F4F4F4;--ln:#DDD;--bd:#767676;--tx:#000;--mu:#555;--gt:#006B43;--g:#00EC97;box-sizing:border-box}
-@media(prefers-color-scheme:dark){:root{--bg:#000;--s:#111;--ln:#333;--bd:#6B6B6B;--tx:#fff;--mu:#B3B3B3;--gt:#00EC97}}
+:root{--g:#00EC97;box-sizing:border-box}
 *,*:before,*:after{box-sizing:inherit}
 html{scroll-behavior:smooth;scroll-padding-top:72px}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
-body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.55 "Instrument Sans",system-ui,sans-serif}
+body{margin:0;background:#000;color:#fff;font:16px/1.55 "Instrument Sans",system-ui,sans-serif}
 h1,h2,h3,p,ul,ol,pre{margin:0}a{color:inherit}
 .in{max-width:1100px;margin:0 auto;padding:0 20px}
+/* two palettes only: black bands and light bands */
 .dk{--bg:#000;--s:#111;--ln:#2a2a2a;--bd:#6B6B6B;--tx:#fff;--mu:#B3B3B3;--gt:#00EC97;background:#000;color:#fff}
+.lt{--bg:#F5F5F2;--s:#fff;--ln:#DADAD6;--bd:#767676;--tx:#000;--mu:#555;--gt:#006B43;background:#F5F5F2;color:#000}
+.band{position:relative;border-radius:32px 32px 0 0;margin-top:-32px;padding:96px 0}
+@media(max-width:700px){.band{padding:64px 0;border-radius:24px 24px 0 0;margin-top:-24px}}
 .mu{color:var(--mu)}.gt{color:var(--gt)}
 
-/* header: always dark glass, like the X banner */
+/* header: dark glass */
 .hd{position:sticky;top:0;z-index:50;background:rgba(0,0,0,.6);-webkit-backdrop-filter:blur(16px) saturate(1.7);backdrop-filter:blur(16px) saturate(1.7);border-bottom:1px solid #2a2a2a;color:#fff}
 .hd .in{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px}
 .logo{display:flex;align-items:center;gap:8px;text-decoration:none;font-size:20px;font-weight:700}
 .nav{display:flex;align-items:center;gap:4px}
-.nav a{min-height:44px;display:inline-flex;align-items:center;padding:0 12px;text-decoration:none;color:#B3B3B3;font-weight:500;font-size:15px}
-.nav a:hover{color:#fff}
-@media(max-width:760px){.nav .lk{display:none}}
-.btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 20px;border-radius:8px;font:700 15px "Instrument Sans",system-ui,sans-serif;text-decoration:none;border:1px solid transparent;cursor:pointer}
-.btn.p{background:var(--g);color:#000}.btn.p:hover{background:#33f2ad}
+.nav a.lk{min-height:44px;display:inline-flex;align-items:center;padding:0 12px;text-decoration:none;color:#B3B3B3;font-weight:500;font-size:15px}
+.nav a.lk:hover{color:#fff}
+@media(max-width:900px){.nav a.lk{display:none}}
+.xl{display:inline-flex;align-items:center;gap:6px}.xl[hidden]{display:none}.xl svg{fill:currentColor}
+
+/* buttons: label + arrow box */
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 20px;border-radius:8px;font:700 15px "Instrument Sans",system-ui,sans-serif;text-decoration:none;border:1px solid transparent;cursor:pointer}
+.btn.p{background:var(--g);color:#000;padding-right:8px;gap:16px}
+.btn.p .ar{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:5px;background:#000;color:var(--g);transition:transform .2s}
+.btn.p:hover .ar{transform:translate(2px,-2px)}
 .btn.o{border-color:#6B6B6B;color:#fff}.btn.o:hover{border-color:#fff}
-.btn.sm{min-height:40px;padding:0 16px}
+.lt .btn.o{border-color:#767676;color:#000}.lt .btn.o:hover{border-color:#000}
+.btn.sm{min-height:40px;padding:0 6px 0 16px;gap:12px}.btn.sm .ar{width:28px;height:28px}
 :focus-visible{outline:2px solid var(--g);outline-offset:3px}
+.lt :focus-visible{outline-color:#006B43}
 
 /* hero */
-.hero{padding:72px 0 88px}
+.hero{padding:72px 0 120px}
 .hero .in{display:grid;grid-template-columns:1.15fr .85fr;gap:56px;align-items:center}
 h1{font-size:clamp(46px,8.4vw,104px);line-height:.94;letter-spacing:-.045em;font-weight:700}
 .lead{margin-top:28px;font-size:20px;line-height:1.5;color:#d6d6d6;max-width:30em}
 .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
 .note{margin-top:18px;font-size:14px;color:var(--mu)}
-@media(max-width:900px){.hero{padding:40px 0 56px}.hero .in{grid-template-columns:1fr;gap:40px}.lead{font-size:18px}}
+@media(max-width:900px){.hero{padding:40px 0 96px}.hero .in{grid-template-columns:1fr;gap:40px}.lead{font-size:18px}}
 
-/* specimen: one entry, shown whole */
 .spec{background:#0f0f0f;border:1px solid #2f2f2f;border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px}
 .sp-top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;color:var(--mu)}
 .chip{border:1px solid currentColor;border-radius:4px;padding:1px 8px;font-size:13px;font-weight:700}
 .spec h2{font-size:21px;line-height:1.25;letter-spacing:-.01em}
 .spec .sum{font-size:15px;color:#d0d0d0}
-.pool[hidden]{display:none}
-.pool{display:flex;flex-direction:column;gap:6px}
+.pool[hidden]{display:none}.pool{display:flex;flex-direction:column;gap:6px}
 .bar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:#2a2a2a}.bar i{display:block}
 .bar .y{background:var(--g)}.bar .n{background:#fff}
 .pl{display:flex;justify-content:space-between;font-size:13px;color:var(--mu)}
 .verdict{border-top:1px solid #2f2f2f;padding-top:14px;display:flex;flex-direction:column;gap:6px}
 .verdict b{font-size:18px}
 .hash{font:13px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;color:#b3b3b3;word-break:break-all}
-
-/* strip */
-.strip{border-bottom:1px solid var(--ln);background:var(--s)}
-.strip .in{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
-.strip div.s{padding:16px 20px 16px 0;border-right:1px solid var(--ln);margin-right:20px}
-.strip div.s:last-child{border-right:0;margin-right:0}
-.strip b{display:block;font-size:24px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-.strip span{font-size:13px;color:var(--mu)}
-@media(max-width:700px){.strip .in{grid-template-columns:repeat(2,1fr)}.strip div.s{border-right:0;margin-right:0;padding:14px 8px 14px 0}}
-
-section.sec{padding:88px 0;border-bottom:1px solid var(--ln)}
-@media(max-width:700px){section.sec{padding:56px 0}}
-h2.h{font-size:clamp(30px,4.6vw,52px);line-height:1.05;letter-spacing:-.035em;max-width:16em}
-.sub{margin-top:16px;color:var(--mu);font-size:18px;max-width:34em}
-
-/* steps: a real sequence, so numbered */
-.steps{list-style:none;padding:0;margin:48px 0 0;display:grid;grid-template-columns:repeat(4,1fr);gap:0;counter-reset:s}
-.steps li{padding:0 24px 0 0;position:relative;counter-increment:s}
-.steps li:before{content:counter(s);display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:var(--g);color:#000;font-weight:700;font-size:15px;position:relative;z-index:1}
-.steps li:after{content:"";position:absolute;top:17px;left:34px;right:0;height:1px;background:var(--bd)}
-.steps li:last-child:after{display:none}
-.steps h3{margin-top:18px;font-size:19px;letter-spacing:-.01em}
-.steps p{margin-top:8px;color:var(--mu);font-size:15px}
-@media(max-width:860px){.steps{grid-template-columns:1fr;gap:28px}.steps li{padding:0 0 0 52px}.steps li:before{position:absolute;left:0;top:0}.steps li:after{top:34px;bottom:-28px;left:17px;right:auto;width:1px;height:auto}.steps h3{margin-top:4px}}
-
-/* evidence */
-.two{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start;margin-top:44px}
-@media(max-width:860px){.two{grid-template-columns:1fr;gap:32px}}
-.two>*{min-width:0}
-.pts{list-style:none;padding:0;display:flex;flex-direction:column;gap:22px}
-.pts h3{font-size:18px;letter-spacing:-.01em}.pts p{margin-top:4px;color:var(--mu);font-size:15px}
-pre.rec{background:var(--s);border:1px solid var(--ln);border-radius:12px;padding:18px;overflow-x:auto;font:13.5px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--tx)}
-.rec .k{color:var(--gt)}
 .cap{margin-top:10px;font-size:13px;color:var(--mu)}
 
+/* ticker of open markets */
+.tick{position:relative;z-index:2;background:#000;border-top:1px solid #2a2a2a;border-bottom:1px solid #2a2a2a;overflow:hidden;margin-top:-32px;padding:0}
+.tick[hidden]{display:none}
+.tk-track{display:flex;width:max-content;animation:tk 70s linear infinite}
+.tick:hover .tk-track,.tick:focus-within .tk-track{animation-play-state:paused}
+.tk{display:flex;align-items:center;gap:14px;padding:18px 32px;border-right:1px solid #2a2a2a;text-decoration:none;white-space:nowrap}
+.tk b{font-weight:500;font-size:16px;color:#e8e8e8}
+.tk i{font-style:normal;font-weight:700;font-size:22px;color:var(--g);font-variant-numeric:tabular-nums}
+.tk em{font-style:normal;font-size:13px;color:#8a8a8a}
+@keyframes tk{to{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){.tick{overflow-x:auto}.tk-track{animation:none}}
+
+/* statement: lights up word by word */
+.stmt{padding:112px 0 72px}
+.stmt p{font-size:clamp(28px,4.6vw,56px);line-height:1.12;letter-spacing:-.035em;font-weight:500;max-width:19em}
+.stmt .w{color:#c9c9c4;transition:color .25s}.stmt .w.on{color:#000}
+@media(prefers-reduced-motion:reduce){.stmt .w{color:#000;transition:none}}
+.stmt a.more{display:inline-block;margin-top:32px;font-weight:700;min-height:44px;line-height:44px}
+
+/* stats */
+.strip .in{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--ln)}
+.strip div.s{padding:24px 20px 0 0;border-right:1px solid var(--ln);margin-right:20px}
+.strip div.s:last-child{border-right:0;margin-right:0}
+.strip b{display:block;font-size:clamp(34px,5vw,56px);line-height:1;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.strip span{display:block;margin-top:8px;font-size:14px;color:var(--mu)}
+@media(max-width:700px){.strip .in{grid-template-columns:repeat(2,1fr)}.strip div.s{border-right:0;margin-right:0;padding:20px 8px 0 0}}
+.stripwrap{padding-bottom:88px}
+.stripwrap[hidden]{display:none}
+
+h2.h{font-size:clamp(30px,4.6vw,56px);line-height:1.03;letter-spacing:-.04em;max-width:15em}
+.sub{margin-top:16px;color:var(--mu);font-size:18px;max-width:34em}
+
+/* how it works: cards stack as you scroll */
+.stack{margin-top:56px}
+.sc{position:sticky;top:calc(84px + var(--i)*16px);border-radius:24px;padding:36px 40px;margin-bottom:24px;display:grid;grid-template-columns:150px 1fr;gap:32px;align-items:center;min-height:240px;border:1px solid #2a2a2a}
+.sc .n{font-size:clamp(80px,12vw,150px);line-height:.8;letter-spacing:-.06em;font-weight:700}
+.sc h3{font-size:clamp(26px,3.4vw,40px);letter-spacing:-.03em;line-height:1.05}
+.sc p{margin-top:12px;font-size:18px;max-width:30em;opacity:.8}
+.c1{background:var(--g);color:#000}
+.c2{background:#fff;color:#000}
+.c3{background:#161616;color:#fff}
+.c4{background:#063a28;color:#fff;border-color:#0c5a3e}
+.c3 .n,.c4 .n{color:var(--g)}
+@media(max-width:700px){.sc{grid-template-columns:1fr;gap:12px;padding:26px 22px;min-height:0}.sc .n{font-size:64px}.sc p{font-size:16px}}
+@media(prefers-reduced-motion:reduce){.sc{position:relative;top:auto}}
+
+/* evidence */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start;margin-top:48px}
+.two>*{min-width:0}
+@media(max-width:860px){.two{grid-template-columns:1fr;gap:32px}}
+.pts{list-style:none;padding:0;display:flex;flex-direction:column;gap:24px}
+.pts h3{font-size:19px;letter-spacing:-.01em}.pts p{margin-top:4px;color:var(--mu);font-size:15px}
+pre.rec{background:#000;color:#e8e8e8;border-radius:16px;padding:22px;overflow-x:auto;font:13.5px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace}
+.rec .k{color:var(--g)}
+
 /* economy */
-.fee{margin-top:44px;display:flex;flex-direction:column;gap:30px;max-width:760px}
+.fee{margin-top:48px;display:flex;flex-direction:column;gap:32px;max-width:780px}
 .fr .lb{display:flex;justify-content:space-between;gap:12px;font-size:14px;margin-bottom:8px;flex-wrap:wrap}
 .fr .lb span:first-child{color:var(--mu)}
-.fb{display:flex;height:44px;border-radius:8px;overflow:hidden;font-weight:700;font-size:14px}
+.fb{display:flex;height:48px;border-radius:10px;overflow:hidden;font-weight:700;font-size:14px}
 .fb div{display:flex;align-items:center;padding:0 14px;white-space:nowrap}
 .f1{background:var(--s);border:1px solid var(--ln);color:var(--tx)}
 .f2{background:var(--g);color:#000}
-.f3{background:var(--tx);color:var(--bg)}
+.f3{background:#fff;color:#000}
 
 /* live markets */
 .mk{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px;margin-top:40px}
-.mc{display:flex;flex-direction:column;gap:12px;background:var(--s);border:1px solid var(--ln);border-radius:12px;padding:18px;text-decoration:none}
-.mc:hover{border-color:var(--bd)}
-.mc h3{font-size:17px;line-height:1.3}
+.mc{display:flex;flex-direction:column;gap:12px;background:var(--s);border:1px solid var(--ln);border-radius:16px;padding:20px;text-decoration:none}
+.mc:hover{border-color:var(--tx)}
+.mc h3{font-size:18px;line-height:1.3;letter-spacing:-.01em}
 .mc .pl{color:var(--mu)}
-.mc .bar{background:var(--ln)}.mc .bar .n{background:var(--tx)}
+.mc .pc{font-size:44px;line-height:1;letter-spacing:-.04em;font-weight:700;font-variant-numeric:tabular-nums}
+.mc .pc small{font-size:14px;font-weight:500;color:var(--mu);letter-spacing:0;margin-left:6px}
+.mc .bar{background:var(--ln)}.mc .bar .y{background:#006B43}.mc .bar .n{background:#000}
+
+/* faq */
+.faq{margin-top:44px;max-width:780px;border-top:1px solid var(--ln)}
+.faq details{border-bottom:1px solid var(--ln)}
+.faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:22px 0;font-size:20px;font-weight:500;letter-spacing:-.01em;min-height:44px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary:after{content:"+";flex:none;width:34px;height:34px;border-radius:50%;background:#000;color:var(--g);display:flex;align-items:center;justify-content:center;font-size:22px;line-height:1;transition:transform .2s}
+.faq details[open] summary:after{transform:rotate(45deg)}
+.faq p{padding:0 50px 24px 0;color:var(--mu);font-size:17px;max-width:38em}
 
 /* closing */
-.end{padding:96px 0;text-align:left}
-.end h2{font-size:clamp(34px,6vw,72px);line-height:1;letter-spacing:-.04em;max-width:12em}
-@media(max-width:700px){.end{padding:56px 0}}
+.end{padding:112px 0 120px}
+.end h2{font-size:clamp(38px,7vw,88px);line-height:.98;letter-spacing:-.045em;max-width:11em}
+@media(max-width:700px){.end{padding:72px 0 80px}}
 
 /* footer */
-.ft{border-top:1px solid #2a2a2a}
+.ft{border-top:1px solid #2a2a2a;border-radius:0;margin-top:0}
 .ft .in{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:28px;padding-top:36px;padding-bottom:calc(36px + env(safe-area-inset-bottom,0px))}
 .ft h4{margin:0 0 8px;font-size:14px;color:var(--mu);font-weight:500}
 .ft ul{list-style:none;margin:0;padding:0}.ft li a{display:inline-flex;align-items:center;min-height:36px;text-decoration:none}
 .ft li a:hover{text-decoration:underline}
-.xl{display:inline-flex;align-items:center;gap:6px}.xl[hidden]{display:none}.xl svg{fill:currentColor}
 @media(max-width:820px){.ft .in{grid-template-columns:1fr}}
 </style>
 </head>
@@ -136,8 +176,9 @@ pre.rec{background:var(--s);border:1px solid var(--ln);border-radius:12px;paddin
       <a class="lk" href="#evidence">Evidence</a>
       <a class="lk" href="#agent">Agent economy</a>
       <a class="lk" href="#markets">Markets</a>
+      <a class="lk" href="#faq">FAQ</a>
       <a id="xh" class="xl" hidden aria-label="Ctrl Predicts on X" target="_blank" rel="noopener noreferrer" style="min-width:44px;min-height:44px;justify-content:center;color:#fff"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
-      <a class="btn p sm" href="app.html" style="color:#000;padding:0 16px;margin-left:8px">Launch app</a>
+      <a class="btn p sm" href="app.html" style="margin-left:8px">Launch app<span class="ar"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 11 11 3M4.5 3H11v6.5"/></svg></span></a>
     </nav>
   </div>
 </header>
@@ -149,14 +190,13 @@ pre.rec{background:var(--s);border:1px solid var(--ln);border-radius:12px;paddin
       <h1>Every fact<br>is a market.</h1>
       <p class="lead">Each question is a YES/NO market on NEAR. An AI agent writes the entry, then settles the market on-chain and shows the evidence.</p>
       <div class="cta">
-        <a class="btn p" href="app.html">Launch app</a>
+        <a class="btn p" href="app.html">Launch app<span class="ar"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 11 11 3M4.5 3H11v6.5"/></svg></span></a>
         <a class="btn o" href="https://github.com/zoelaenski/ctrl-predicts" target="_blank" rel="noopener noreferrer">View the code</a>
       </div>
       <p class="note">Live on NEAR testnet. No real funds.</p>
     </div>
-
     <article class="spec" aria-label="Example of one entry">
-      <div class="sp-top"><span class="chip">Crypto</span><span id="sp-status" class="chip">Resolved</span></div>
+      <div class="sp-top"><span class="chip">Crypto</span><span class="chip">Resolved</span></div>
       <h2 id="sp-q">Will NEAR trade above $3.84 (CoinGecko) when this market closes?</h2>
       <p class="sum">The agent reads the price at the close time and compares it with the line in the question. Prices are settled by a fixed rule, with the CoinGecko data attached.</p>
       <div class="pool" id="sp-pool" hidden>
@@ -172,28 +212,37 @@ pre.rec{background:var(--s);border:1px solid var(--ln);border-radius:12px;paddin
   </div>
 </section>
 
-<div class="strip" id="strip" hidden>
-  <div class="in">
-    <div class="s"><b id="st-m">0</b><span>markets created</span></div>
-    <div class="s"><b id="st-v">0</b><span>NEAR traded (testnet)</span></div>
-    <div class="s"><b id="st-f">0</b><span>NEAR in fees</span></div>
-    <div class="s"><b id="st-a">0</b><span>NEAR earned by the agent</span></div>
-  </div>
-</div>
+<div class="tick" id="tick" hidden aria-label="Open markets"><div class="tk-track" id="tk"></div></div>
 
-<section class="sec" id="how">
+<section class="band lt stmt" aria-label="What Ctrl Predicts does">
   <div class="in">
-    <h2 class="h">From question to payout in four steps</h2>
-    <ol class="steps">
-      <li><h3>Read the entry</h3><p>The agent writes a short summary with sources for every question, so you know what you're betting on.</p></li>
-      <li><h3>Bet YES or NO</h3><p>Connect a NEAR wallet and stake testnet NEAR. The two pools set the price.</p></li>
-      <li><h3>The agent resolves it</h3><p>After the market closes, the agent checks the evidence and settles the market on-chain.</p></li>
-      <li><h3>Claim your winnings</h3><p>Winners share the pool minus a 2% fee. A market with bets on one side only is refunded.</p></li>
-    </ol>
+    <p id="stmt">Most prediction markets ask you to trust whoever settles them. Ctrl Predicts shows its work: an AI agent writes the entry, settles the market on-chain, and attaches the evidence for anyone to check.</p>
+    <a class="more" href="app.html">See the markets</a>
   </div>
 </section>
 
-<section class="sec" id="evidence" style="background:var(--s)">
+<section class="lt stripwrap strip" id="strip" hidden>
+  <div class="in">
+    <div class="s"><b data-n="0" id="st-m">0</b><span>markets created</span></div>
+    <div class="s"><b data-n="0" id="st-v">0</b><span>NEAR traded on testnet</span></div>
+    <div class="s"><b data-n="0" id="st-f">0</b><span>NEAR paid in fees</span></div>
+    <div class="s"><b data-n="0" id="st-a">0</b><span>NEAR earned by the agent</span></div>
+  </div>
+</section>
+
+<section class="band dk" id="how">
+  <div class="in">
+    <h2 class="h">From question to payout in four steps</h2>
+    <div class="stack">
+      <div class="sc c1" style="--i:0"><div class="n">1</div><div><h3>Read the entry</h3><p>The agent writes a short summary with sources for every question, so you know what you are betting on.</p></div></div>
+      <div class="sc c2" style="--i:1"><div class="n">2</div><div><h3>Bet YES or NO</h3><p>Connect a NEAR wallet and stake testnet NEAR. The two pools set the price.</p></div></div>
+      <div class="sc c3" style="--i:2"><div class="n">3</div><div><h3>The agent resolves it</h3><p>After the market closes, the agent checks the evidence and settles it on-chain.</p></div></div>
+      <div class="sc c4" style="--i:3"><div class="n">4</div><div><h3>Claim your winnings</h3><p>Winners share the pool minus a 2% fee. A market with bets on one side only is refunded.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="band lt" id="evidence">
   <div class="in">
     <h2 class="h">Every answer comes with its evidence</h2>
     <p class="sub">The agent never just says who won. It saves its reasoning and sources, and stores a fingerprint of them on-chain.</p>
@@ -221,7 +270,7 @@ pre.rec{background:var(--s);border:1px solid var(--ln);border-radius:12px;paddin
   </div>
 </section>
 
-<section class="sec" id="agent">
+<section class="band dk" id="agent">
   <div class="in">
     <h2 class="h">The resolver agent gets paid for doing the job</h2>
     <p class="sub">A 2% fee is taken from the pool when a market resolves. 30% of it goes straight to the agent's account, 70% to the treasury. Both are visible on the Stats page.</p>
@@ -238,19 +287,33 @@ pre.rec{background:var(--s);border:1px solid var(--ln);border-radius:12px;paddin
   </div>
 </section>
 
-<section class="sec" id="markets" style="background:var(--s)">
+<section class="band lt" id="markets">
   <div class="in">
     <h2 class="h">Open markets right now</h2>
-    <p class="sub">Crypto, music and football, on NEAR testnet.</p>
+    <p class="sub">Crypto, music and football, on NEAR testnet. The big number is the share of the pool on YES.</p>
     <div class="mk" id="mk"></div>
-    <div class="cta" style="margin-top:32px"><a class="btn p" href="app.html#markets" style="color:#000">See all markets</a></div>
+    <div class="cta" style="margin-top:32px"><a class="btn p" href="app.html#markets">See all markets<span class="ar"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 11 11 3M4.5 3H11v6.5"/></svg></span></a></div>
   </div>
 </section>
 
-<section class="end dk">
+<section class="band lt" id="faq" style="background:#fff;--bg:#fff">
+  <div class="in">
+    <h2 class="h">Questions people ask</h2>
+    <div class="faq">
+      <details><summary>Is this real money?</summary><p>No. Ctrl Predicts runs on NEAR testnet, so you bet with free testnet NEAR. Mainnet is planned, and before real money is involved we want a challenge window on every resolution and a legal review.</p></details>
+      <details><summary>Who settles the markets?</summary><p>An AI agent with its own NEAR account. Only that account can resolve a market, and only after the market has closed.</p></details>
+      <details><summary>How do I check an answer?</summary><p>Open a resolved market. You see the outcome, the agent's reasoning and sources, and the evidence hash that is stored on-chain with the market.</p></details>
+      <details><summary>What happens if the evidence is unclear?</summary><p>The agent does not guess. The market stays unresolved. If everyone bet on one side, the market is refunded.</p></details>
+      <details><summary>How does the agent earn?</summary><p>A 2% fee is taken from the pool at resolution. 30% of it is paid to the resolver agent's account straight away, and 70% goes to the treasury.</p></details>
+      <details><summary>Which questions can I bet on?</summary><p>Crypto prices, music and football today. Crypto prices are settled by a fixed rule on CoinGecko data. Other questions are settled from news sources.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="band dk end">
   <div class="in">
     <h2>Pick a question. Back your answer.</h2>
-    <div class="cta"><a class="btn p" href="app.html">Launch app</a><a class="btn o" href="https://github.com/zoelaenski/ctrl-predicts" target="_blank" rel="noopener noreferrer">View the code</a></div>
+    <div class="cta"><a class="btn p" href="app.html">Launch app<span class="ar"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 11 11 3M4.5 3H11v6.5"/></svg></span></a><a class="btn o" href="https://github.com/zoelaenski/ctrl-predicts" target="_blank" rel="noopener noreferrer">View the code</a></div>
   </div>
 </section>
 </main>
@@ -276,19 +339,18 @@ const X_URL = 'https://x.com/ctrl_predicts';
 const qs = new URLSearchParams(location.search);
 const API = (qs.get('api') || 'https://ctrl-predicts-api.onrender.com').replace(/\/$/, '');
 const $ = id => document.getElementById(id);
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 if (X_URL) for (const id of ['xh', 'xf']) { $(id).href = X_URL; $(id).hidden = false; }
 
 const E24 = 10n ** 24n;
+const nearNum = y => { try { const n = BigInt(y); return Number(n / 10n ** 20n) / 10000; } catch { return 0; } };
 const near = y => { try { const n = BigInt(y); const f = (n % E24) / 10n ** 22n; return (n / E24).toString() + '.' + f.toString().padStart(2, '0'); } catch { return '0.00'; } };
 async function get(path) {
   const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 20000);
   try { const r = await fetch(API + path, { signal: ctl.signal }); if (!r.ok) throw new Error(r.status); return await r.json(); } finally { clearTimeout(t); }
 }
-function poolBar(m, yEl, nEl) {
-  const y = BigInt(m.yes_pool), n = BigInt(m.no_pool), t = y + n;
-  const yp = t === 0n ? 50 : Number((y * 1000n) / t) / 10;
-  yEl.style.width = yp + '%'; nEl.style.width = (100 - yp) + '%';
-}
+const yesPct = m => { const y = BigInt(m.yes_pool), t = y + BigInt(m.no_pool); return t === 0n ? null : Number((y * 1000n) / t) / 10; };
+function poolBar(m, yEl, nEl) { const p = yesPct(m) ?? 50; yEl.style.width = p + '%'; nEl.style.width = (100 - p) + '%'; }
 function closes(ms) {
   const d = ms - Date.now(); if (d <= 0) return 'Closed';
   const h = d / 36e5; if (h < 1) return 'Closes in under an hour';
@@ -296,12 +358,42 @@ function closes(ms) {
   return 'Closes in ' + Math.round(h / 24) + ' days';
 }
 
+/* statement: words light up as the section scrolls into view */
+(function () {
+  const el = $('stmt'); const words = el.textContent.trim().split(/\s+/);
+  el.textContent = '';
+  const spans = words.map(w => { const s = document.createElement('span'); s.className = 'w'; s.textContent = w; el.append(s, ' '); return s; });
+  if (REDUCED) { spans.forEach(s => s.classList.add('on')); return; }
+  let tick = false;
+  const upd = () => {
+    tick = false;
+    const r = el.getBoundingClientRect(), vh = innerHeight;
+    const p = Math.min(1, Math.max(0, (vh * 0.82 - r.top) / (r.height + vh * 0.12)));
+    const n = Math.round(p * spans.length);
+    spans.forEach((s, i) => s.classList.toggle('on', i < n));
+  };
+  const req = () => { if (!tick) { tick = true; requestAnimationFrame(upd); } };
+  addEventListener('scroll', req, { passive: true }); addEventListener('resize', req); upd();
+})();
+
+/* count-up when the numbers come into view */
+function countUp(el, target, dec) {
+  const show = v => el.textContent = dec ? v.toFixed(dec) : String(Math.round(v));
+  if (REDUCED || target === 0) { show(target); return; }
+  const t0 = performance.now(), D = 1200;
+  const step = t => { const k = Math.min(1, (t - t0) / D); show(target * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+function onView(el, fn) {
+  if (!('IntersectionObserver' in window)) return fn();
+  const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); fn(); } }, { threshold: .4 });
+  io.observe(el);
+}
+
 get('/api/stats').then(s => {
-  $('st-m').textContent = s.markets_total;
-  $('st-v').textContent = near(s.total_volume);
-  $('st-f').textContent = near(s.fees_collected);
-  $('st-a').textContent = near(s.resolver_earned);
+  const vals = [['st-m', Number(s.markets_total), 0], ['st-v', nearNum(s.total_volume), 2], ['st-f', nearNum(s.fees_collected), 2], ['st-a', nearNum(s.resolver_earned), 2]];
   $('strip').hidden = false;
+  onView($('strip'), () => vals.forEach(([id, v, d]) => countUp($(id), v, d)));
 }).catch(() => {});
 
 get('/api/entries').then(rows => {
@@ -309,32 +401,53 @@ get('/api/entries').then(rows => {
   const m1 = ms.find(m => m.id === 1 && m.status === 'resolved' && m.outcome);
   if (m1) {
     $('sp-q').textContent = m1.question;
-    $('sp-out').textContent = m1.outcome;
-    if (m1.refund) $('sp-out').textContent = m1.outcome + ' (refunded)';
+    $('sp-out').textContent = m1.refund ? m1.outcome + ' (refunded)' : m1.outcome;
     if (m1.evidence_hash) $('sp-hash').textContent = 'Evidence hash ' + m1.evidence_hash;
     poolBar(m1, $('sp-y'), $('sp-n'));
     $('sp-yv').textContent = near(m1.yes_pool) + ' NEAR'; $('sp-nv').textContent = near(m1.no_pool) + ' NEAR';
     $('sp-pool').hidden = false; $('sp-cap').hidden = false;
   }
-  const open = ms.filter(m => m.status === 'open').sort((a, b) => b.id - a.id).slice(0, 6);
+  const open = ms.filter(m => m.status === 'open').sort((a, b) => b.id - a.id);
+
+  /* ticker */
+  if (open.length) {
+    const track = $('tk');
+    const mk = m => {
+      const a = document.createElement('a'); a.className = 'tk'; a.href = 'app.html#market-' + m.id;
+      const b = document.createElement('b'); b.textContent = m.question;
+      const i = document.createElement('i'); const p = yesPct(m);
+      i.textContent = p === null ? 'New' : 'YES ' + Math.round(p) + '%';
+      const e = document.createElement('em'); e.textContent = closes(m.closes_at_ms);
+      a.append(b, i, e); return a;
+    };
+    const items = open.slice(0, 8);
+    const reps = Math.max(2, Math.ceil(6 / items.length) * 2);
+    for (let r = 0; r < reps; r++) items.forEach(m => { const n = mk(m); if (r % 2 === 1) { n.setAttribute('aria-hidden', 'true'); n.tabIndex = -1; } track.append(n); });
+    $('tick').hidden = false;
+  }
+
+  /* open market cards */
   const box = $('mk');
   if (!open.length) { box.innerHTML = '<p class="mu">New markets are on the way. Open the app to see every market.</p>'; return; }
-  for (const m of open) {
+  for (const m of open.slice(0, 6)) {
     const a = document.createElement('a'); a.className = 'mc'; a.href = 'app.html#market-' + m.id;
     const top = document.createElement('div'); top.className = 'pl'; top.style.justifyContent = 'flex-start'; top.style.gap = '10px';
     const chip = document.createElement('span'); chip.className = 'chip'; chip.textContent = m.category;
     const cl = document.createElement('span'); cl.textContent = closes(m.closes_at_ms);
     top.append(chip, cl);
     const h = document.createElement('h3'); h.textContent = m.question;
+    const p = yesPct(m);
+    const big = document.createElement('div'); big.className = 'pc';
+    big.textContent = p === null ? 'No bets yet' : Math.round(p) + '%';
+    if (p !== null) { const sm = document.createElement('small'); sm.textContent = 'on YES'; big.append(sm); } else { big.style.fontSize = '24px'; }
     const bar = document.createElement('div'); bar.className = 'bar';
     const y = document.createElement('i'); y.className = 'y'; const n = document.createElement('i'); n.className = 'n'; bar.append(y, n);
     poolBar(m, y, n);
     const pl = document.createElement('div'); pl.className = 'pl';
-    const total = BigInt(m.yes_pool) + BigInt(m.no_pool);
     pl.innerHTML = '<span></span><span></span>';
-    pl.children[0].textContent = total === 0n ? 'No bets yet' : 'YES ' + near(m.yes_pool);
-    pl.children[1].textContent = total === 0n ? '' : 'NO ' + near(m.no_pool);
-    a.append(top, h, bar, pl); box.append(a);
+    pl.children[0].textContent = p === null ? '' : 'YES ' + near(m.yes_pool) + ' NEAR';
+    pl.children[1].textContent = p === null ? '' : 'NO ' + near(m.no_pool) + ' NEAR';
+    a.append(top, h, big, bar, pl); box.append(a);
   }
 }).catch(() => {
   $('mk').innerHTML = '<p class="mu">The market list is waking up. Open the app to see every market.</p>';
