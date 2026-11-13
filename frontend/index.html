@@ -3,351 +3,342 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>CTRL: prediction markets on NEAR</title>
+<title>Ctrl Predicts: every fact is a market</title>
+<meta name="description" content="An AI encyclopedia where every entry is a YES/NO prediction market on NEAR. An AI agent writes the entry, settles the market on-chain and shows its evidence.">
+<meta property="og:title" content="Ctrl Predicts: every fact is a market">
+<meta property="og:description" content="AI-written entries. AI-settled markets. Evidence on-chain. Live on NEAR testnet.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 26 26%27%3E%3Crect width=%2726%27 height=%2726%27 rx=%276%27 fill=%27%23000%27/%3E%3Cpath d=%27M18.6 7.4A6.6 6.6 0 1 0 18.6 18.6%27 transform=%27translate(1.3 0) scale(.95)%27 fill=%27none%27 stroke=%27%2300EC97%27 stroke-width=%273.2%27 stroke-linecap=%27round%27/%3E%3Ccircle cx=%2721.5%27 cy=%2713%27 r=%271.7%27 fill=%27%23fff%27/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;700&display=swap">
 <style>
-:root{--bg:#fff;--s:#F4F4F4;--ln:#DDD;--bd:#767676;--tx:#000;--mu:#555;--gt:#006B43;--no:#000;--onno:#fff;--g:#00EC97;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#000;--s:#111;--ln:#333;--bd:#6B6B6B;--tx:#fff;--mu:#B3B3B3;--gt:#00EC97;--no:#fff;--onno:#000}}
-:root[data-theme="dark"]{--bg:#000;--s:#111;--ln:#333;--bd:#6B6B6B;--tx:#fff;--mu:#B3B3B3;--gt:#00EC97;--no:#fff;--onno:#000}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
+:root{--bg:#fff;--s:#F4F4F4;--ln:#DDD;--bd:#767676;--tx:#000;--mu:#555;--gt:#006B43;--g:#00EC97;box-sizing:border-box}
+@media(prefers-color-scheme:dark){:root{--bg:#000;--s:#111;--ln:#333;--bd:#6B6B6B;--tx:#fff;--mu:#B3B3B3;--gt:#00EC97}}
 *,*:before,*:after{box-sizing:inherit}
-body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 "Instrument Sans",system-ui,sans-serif;font-variant-numeric:tabular-nums}
-h1,h2,h3,p,ul{margin:0}a{color:inherit}h3 a{text-decoration:none}
-.w{max-width:1100px;margin:0 auto;padding:20px 16px 48px}
-.mu{color:var(--mu);font-size:13px}.gt{color:var(--gt)}
-.r{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.sp{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.hd{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.7);background:color-mix(in srgb,var(--bg) 60%,transparent);-webkit-backdrop-filter:blur(16px) saturate(1.7);backdrop-filter:blur(16px) saturate(1.7);border-bottom:1px solid var(--ln)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .hd{background:rgba(0,0,0,.65);background:color-mix(in srgb,var(--bg) 60%,transparent)}}
-.hdi{max-width:1100px;margin:0 auto;padding:8px 16px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
-.w{padding-top:28px;min-height:60vh}
-.ft{border-top:1px solid var(--ln);margin-top:24px;background:var(--s)}
-.fti{max-width:1100px;margin:0 auto;padding:28px 16px calc(28px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:24px}
-.ft a{color:var(--tx)}.ft h4{margin:0 0 8px;font-size:13px;color:var(--mu);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
-.ft ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}.ft li a{display:inline-flex;align-items:center;min-height:36px}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.55 "Instrument Sans",system-ui,sans-serif}
+h1,h2,h3,p,ul,ol,pre{margin:0}a{color:inherit}
+.in{max-width:1100px;margin:0 auto;padding:0 20px}
+.dk{--bg:#000;--s:#111;--ln:#2a2a2a;--bd:#6B6B6B;--tx:#fff;--mu:#B3B3B3;--gt:#00EC97;background:#000;color:#fff}
+.mu{color:var(--mu)}.gt{color:var(--gt)}
+
+/* header: always dark glass, like the X banner */
+.hd{position:sticky;top:0;z-index:50;background:rgba(0,0,0,.6);-webkit-backdrop-filter:blur(16px) saturate(1.7);backdrop-filter:blur(16px) saturate(1.7);border-bottom:1px solid #2a2a2a;color:#fff}
+.hd .in{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px}
+.logo{display:flex;align-items:center;gap:8px;text-decoration:none;font-size:20px;font-weight:700}
+.nav{display:flex;align-items:center;gap:4px}
+.nav a{min-height:44px;display:inline-flex;align-items:center;padding:0 12px;text-decoration:none;color:#B3B3B3;font-weight:500;font-size:15px}
+.nav a:hover{color:#fff}
+@media(max-width:760px){.nav .lk{display:none}}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 20px;border-radius:8px;font:700 15px "Instrument Sans",system-ui,sans-serif;text-decoration:none;border:1px solid transparent;cursor:pointer}
+.btn.p{background:var(--g);color:#000}.btn.p:hover{background:#33f2ad}
+.btn.o{border-color:#6B6B6B;color:#fff}.btn.o:hover{border-color:#fff}
+.btn.sm{min-height:40px;padding:0 16px}
+:focus-visible{outline:2px solid var(--g);outline-offset:3px}
+
+/* hero */
+.hero{padding:72px 0 88px}
+.hero .in{display:grid;grid-template-columns:1.15fr .85fr;gap:56px;align-items:center}
+h1{font-size:clamp(46px,8.4vw,104px);line-height:.94;letter-spacing:-.045em;font-weight:700}
+.lead{margin-top:28px;font-size:20px;line-height:1.5;color:#d6d6d6;max-width:30em}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+.note{margin-top:18px;font-size:14px;color:var(--mu)}
+@media(max-width:900px){.hero{padding:40px 0 56px}.hero .in{grid-template-columns:1fr;gap:40px}.lead{font-size:18px}}
+
+/* specimen: one entry, shown whole */
+.spec{background:#0f0f0f;border:1px solid #2f2f2f;border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.sp-top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;color:var(--mu)}
+.chip{border:1px solid currentColor;border-radius:4px;padding:1px 8px;font-size:13px;font-weight:700}
+.spec h2{font-size:21px;line-height:1.25;letter-spacing:-.01em}
+.spec .sum{font-size:15px;color:#d0d0d0}
+.pool[hidden]{display:none}
+.pool{display:flex;flex-direction:column;gap:6px}
+.bar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:#2a2a2a}.bar i{display:block}
+.bar .y{background:var(--g)}.bar .n{background:#fff}
+.pl{display:flex;justify-content:space-between;font-size:13px;color:var(--mu)}
+.verdict{border-top:1px solid #2f2f2f;padding-top:14px;display:flex;flex-direction:column;gap:6px}
+.verdict b{font-size:18px}
+.hash{font:13px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;color:#b3b3b3;word-break:break-all}
+
+/* strip */
+.strip{border-bottom:1px solid var(--ln);background:var(--s)}
+.strip .in{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+.strip div.s{padding:16px 20px 16px 0;border-right:1px solid var(--ln);margin-right:20px}
+.strip div.s:last-child{border-right:0;margin-right:0}
+.strip b{display:block;font-size:24px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.strip span{font-size:13px;color:var(--mu)}
+@media(max-width:700px){.strip .in{grid-template-columns:repeat(2,1fr)}.strip div.s{border-right:0;margin-right:0;padding:14px 8px 14px 0}}
+
+section.sec{padding:88px 0;border-bottom:1px solid var(--ln)}
+@media(max-width:700px){section.sec{padding:56px 0}}
+h2.h{font-size:clamp(30px,4.6vw,52px);line-height:1.05;letter-spacing:-.035em;max-width:16em}
+.sub{margin-top:16px;color:var(--mu);font-size:18px;max-width:34em}
+
+/* steps: a real sequence, so numbered */
+.steps{list-style:none;padding:0;margin:48px 0 0;display:grid;grid-template-columns:repeat(4,1fr);gap:0;counter-reset:s}
+.steps li{padding:0 24px 0 0;position:relative;counter-increment:s}
+.steps li:before{content:counter(s);display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:var(--g);color:#000;font-weight:700;font-size:15px;position:relative;z-index:1}
+.steps li:after{content:"";position:absolute;top:17px;left:34px;right:0;height:1px;background:var(--bd)}
+.steps li:last-child:after{display:none}
+.steps h3{margin-top:18px;font-size:19px;letter-spacing:-.01em}
+.steps p{margin-top:8px;color:var(--mu);font-size:15px}
+@media(max-width:860px){.steps{grid-template-columns:1fr;gap:28px}.steps li{padding:0 0 0 52px}.steps li:before{position:absolute;left:0;top:0}.steps li:after{top:34px;bottom:-28px;left:17px;right:auto;width:1px;height:auto}.steps h3{margin-top:4px}}
+
+/* evidence */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start;margin-top:44px}
+@media(max-width:860px){.two{grid-template-columns:1fr;gap:32px}}
+.two>*{min-width:0}
+.pts{list-style:none;padding:0;display:flex;flex-direction:column;gap:22px}
+.pts h3{font-size:18px;letter-spacing:-.01em}.pts p{margin-top:4px;color:var(--mu);font-size:15px}
+pre.rec{background:var(--s);border:1px solid var(--ln);border-radius:12px;padding:18px;overflow-x:auto;font:13.5px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--tx)}
+.rec .k{color:var(--gt)}
+.cap{margin-top:10px;font-size:13px;color:var(--mu)}
+
+/* economy */
+.fee{margin-top:44px;display:flex;flex-direction:column;gap:30px;max-width:760px}
+.fr .lb{display:flex;justify-content:space-between;gap:12px;font-size:14px;margin-bottom:8px;flex-wrap:wrap}
+.fr .lb span:first-child{color:var(--mu)}
+.fb{display:flex;height:44px;border-radius:8px;overflow:hidden;font-weight:700;font-size:14px}
+.fb div{display:flex;align-items:center;padding:0 14px;white-space:nowrap}
+.f1{background:var(--s);border:1px solid var(--ln);color:var(--tx)}
+.f2{background:var(--g);color:#000}
+.f3{background:var(--tx);color:var(--bg)}
+
+/* live markets */
+.mk{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px;margin-top:40px}
+.mc{display:flex;flex-direction:column;gap:12px;background:var(--s);border:1px solid var(--ln);border-radius:12px;padding:18px;text-decoration:none}
+.mc:hover{border-color:var(--bd)}
+.mc h3{font-size:17px;line-height:1.3}
+.mc .pl{color:var(--mu)}
+.mc .bar{background:var(--ln)}.mc .bar .n{background:var(--tx)}
+
+/* closing */
+.end{padding:96px 0;text-align:left}
+.end h2{font-size:clamp(34px,6vw,72px);line-height:1;letter-spacing:-.04em;max-width:12em}
+@media(max-width:700px){.end{padding:56px 0}}
+
+/* footer */
+.ft{border-top:1px solid #2a2a2a}
+.ft .in{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:28px;padding-top:36px;padding-bottom:calc(36px + env(safe-area-inset-bottom,0px))}
+.ft h4{margin:0 0 8px;font-size:14px;color:var(--mu);font-weight:500}
+.ft ul{list-style:none;margin:0;padding:0}.ft li a{display:inline-flex;align-items:center;min-height:36px;text-decoration:none}
+.ft li a:hover{text-decoration:underline}
 .xl{display:inline-flex;align-items:center;gap:6px}.xl[hidden]{display:none}.xl svg{fill:currentColor}
-@media(max-width:820px){.fti{grid-template-columns:1fr}}
-.nav a,.t{min-height:44px;display:inline-flex;align-items:center;padding:0 6px;text-decoration:none;color:var(--mu);border:0;border-bottom:3px solid transparent;border-radius:0;font-weight:700;background:none;cursor:pointer}
-.nav a[aria-current],.t[aria-current]{color:var(--tx);border-bottom-color:var(--g)}
-.env{border:1px solid var(--bd);border-radius:6px;padding:2px 8px;font-size:13px;color:var(--mu)}
-button,input,.btn{font:700 14px "Instrument Sans",system-ui,sans-serif;min-height:44px;border-radius:8px;cursor:pointer}
-.sc{background:none;color:var(--tx);border:1px solid var(--bd);padding:0 16px}
-.yes{background:var(--g);color:#000;border:0;padding:0 18px}
-.no{background:var(--no);color:var(--onno);border:0;padding:0 18px}
-a.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
-.c{background:var(--s);border:1px solid var(--ln);border-radius:12px;padding:16px}
-.g3{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
-.bar{display:flex;height:8px;border-radius:4px;overflow:hidden}.bar i{display:block}
-input{background:var(--bg);color:var(--tx);border:1px solid var(--bd);padding:0 12px;cursor:text}
-:focus-visible{outline:2px solid var(--tx);outline-offset:2px}
-.sel{outline:2px solid var(--tx);outline-offset:2px}
-.k{border:1px solid currentColor;border-radius:4px;padding:1px 8px;font-size:13px;font-weight:700}
-.two{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start}
-.col{display:flex;flex-direction:column;gap:12px}
-@media(max-width:820px){.two{grid-template-columns:1fr}}
-@media(prefers-reduced-motion:no-preference){.bar i{transition:width .3s}}
+@media(max-width:820px){.ft .in{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<header class="hd"><div class="hdi">
-<div class="r" style="gap:24px"><a href="#markets" style="display:flex;align-items:center;gap:8px;text-decoration:none;font-size:20px;font-weight:700;min-height:44px"><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><path d="M17.5 6.4A8.6 8.6 0 1 0 17.5 19.6" fill="none" stroke="#00EC97" stroke-width="3.6" stroke-linecap="round"/><circle cx="22.7" cy="13" r="2" fill="currentColor"/></svg>CTRL</a>
-<nav class="nav r" aria-label="Main"><a href="#markets" id="n1">Markets</a><a href="#portfolio" id="n2">Portfolio</a><a href="#stats" id="n3">Stats</a></nav></div>
-<div class="r"><a id="xh" class="xl" hidden aria-label="Ctrl Predicts on X" target="_blank" rel="noopener noreferrer" style="min-width:44px;min-height:44px;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a><span class="env">Testnet: no real funds</span><span class="mu" id="bl"></span><button class="sc" id="conn">Connect wallet</button></div>
-</div></header>
-<div class="w">
-<main id="app"><p class="mu">Loading…</p></main>
-<p class="mu" id="live" role="status" style="margin-top:20px;min-height:20px"></p>
+
+<header class="hd">
+  <div class="in">
+    <a class="logo" href="./" aria-label="Ctrl Predicts home"><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><path d="M17.5 6.4A8.6 8.6 0 1 0 17.5 19.6" fill="none" stroke="#00EC97" stroke-width="3.6" stroke-linecap="round"/><circle cx="22.7" cy="13" r="2" fill="currentColor"/></svg>CTRL</a>
+    <nav class="nav" aria-label="Main">
+      <a class="lk" href="#how">How it works</a>
+      <a class="lk" href="#evidence">Evidence</a>
+      <a class="lk" href="#agent">Agent economy</a>
+      <a class="lk" href="#markets">Markets</a>
+      <a id="xh" class="xl" hidden aria-label="Ctrl Predicts on X" target="_blank" rel="noopener noreferrer" style="min-width:44px;min-height:44px;justify-content:center;color:#fff"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+      <a class="btn p sm" href="app.html" style="color:#000;padding:0 16px;margin-left:8px">Launch app</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="hero dk">
+  <div class="in">
+    <div>
+      <h1>Every fact<br>is a market.</h1>
+      <p class="lead">Each question is a YES/NO market on NEAR. An AI agent writes the entry, then settles the market on-chain and shows the evidence.</p>
+      <div class="cta">
+        <a class="btn p" href="app.html">Launch app</a>
+        <a class="btn o" href="https://github.com/zoelaenski/ctrl-predicts" target="_blank" rel="noopener noreferrer">View the code</a>
+      </div>
+      <p class="note">Live on NEAR testnet. No real funds.</p>
+    </div>
+
+    <article class="spec" aria-label="Example of one entry">
+      <div class="sp-top"><span class="chip">Crypto</span><span id="sp-status" class="chip">Resolved</span></div>
+      <h2 id="sp-q">Will NEAR trade above $3.84 (CoinGecko) when this market closes?</h2>
+      <p class="sum">The agent reads the price at the close time and compares it with the line in the question. Prices are settled by a fixed rule, with the CoinGecko data attached.</p>
+      <div class="pool" id="sp-pool" hidden>
+        <div class="bar"><i class="y" id="sp-y"></i><i class="n" id="sp-n"></i></div>
+        <div class="pl"><span>YES <b id="sp-yv"></b></span><span>NO <b id="sp-nv"></b></span></div>
+      </div>
+      <div class="verdict">
+        <b>Outcome: <span id="sp-out">NO</span></b>
+        <span class="hash" id="sp-hash">Evidence hash stored on-chain with the market</span>
+      </div>
+      <p class="cap" id="sp-cap" style="margin:0" hidden>Example entry. Pools, outcome and hash are read live from market 1 on NEAR testnet.</p>
+    </article>
+  </div>
+</section>
+
+<div class="strip" id="strip" hidden>
+  <div class="in">
+    <div class="s"><b id="st-m">0</b><span>markets created</span></div>
+    <div class="s"><b id="st-v">0</b><span>NEAR traded (testnet)</span></div>
+    <div class="s"><b id="st-f">0</b><span>NEAR in fees</span></div>
+    <div class="s"><b id="st-a">0</b><span>NEAR earned by the agent</span></div>
+  </div>
 </div>
-<footer class="ft"><div class="fti">
-<div class="col" style="gap:8px"><a href="#markets" style="display:flex;align-items:center;gap:8px;text-decoration:none;font-size:20px;font-weight:700"><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><path d="M17.5 6.4A8.6 8.6 0 1 0 17.5 19.6" fill="none" stroke="#00EC97" stroke-width="3.6" stroke-linecap="round"/><circle cx="22.7" cy="13" r="2" fill="currentColor"/></svg>CTRL</a>
-<p class="mu" style="max-width:34ch">Prediction markets where an AI agent resolves the answer and shows its evidence. Built on NEAR for NEAR HACKATHON.</p><p class="mu">Testnet only. No real funds.</p></div>
-<div><h4>Explore</h4><ul><li><a href="#markets">Markets</a></li><li><a href="#portfolio">Portfolio</a></li><li><a href="#stats">Stats</a></li></ul></div>
-<div><h4>Links</h4><ul><li><a id="xf" class="xl" hidden target="_blank" rel="noopener noreferrer"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>Follow on X</a></li><li><a href="https://github.com/zoelaenski/ctrl-predicts" target="_blank" rel="noopener noreferrer">GitHub</a></li><li><a id="ct" target="_blank" rel="noopener noreferrer">Contract on testnet explorer</a></li></ul>
-<p class="mu" id="foot" style="margin-top:8px"></p></div></div></footer>
-<script type="module">
-/* ---------- config ---------- */
-const CONTRACT = 'ctrlpredicts.testnet';
-const RPC = 'https://test.rpc.fastnear.com';
-const EXPLORER = 'https://testnet.nearblocks.io';
-const X_URL = 'https://x.com/ctrl_predicts'; // paste the project's X page link here, e.g. 'https://x.com/yourhandle'
-const NEAR_CONNECT_URL = 'https://esm.sh/@hot-labs/near-connect@0.11.4';
-const store = {
-  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
-  set(k, v) { try { localStorage.setItem(k, v); } catch {} },
-  del(k) { try { localStorage.removeItem(k); } catch {} },
-};
+
+<section class="sec" id="how">
+  <div class="in">
+    <h2 class="h">From question to payout in four steps</h2>
+    <ol class="steps">
+      <li><h3>Read the entry</h3><p>The agent writes a short summary with sources for every question, so you know what you're betting on.</p></li>
+      <li><h3>Bet YES or NO</h3><p>Connect a NEAR wallet and stake testnet NEAR. The two pools set the price.</p></li>
+      <li><h3>The agent resolves it</h3><p>After the market closes, the agent checks the evidence and settles the market on-chain.</p></li>
+      <li><h3>Claim your winnings</h3><p>Winners share the pool minus a 2% fee. A market with bets on one side only is refunded.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="sec" id="evidence" style="background:var(--s)">
+  <div class="in">
+    <h2 class="h">Every answer comes with its evidence</h2>
+    <p class="sub">The agent never just says who won. It saves its reasoning and sources, and stores a fingerprint of them on-chain.</p>
+    <div class="two">
+      <ul class="pts">
+        <li><h3>Prices are settled by a rule, not an opinion</h3><p>For crypto markets the agent compares CoinGecko's price at the close time with the line in the question.</p></li>
+        <li><h3>The AI can't invent sources</h3><p>For news questions the model only picks from links the agent fetched. It never writes a URL itself.</p></li>
+        <li><h3>If it's unclear, it doesn't guess</h3><p>When the evidence doesn't settle the question, the market stays unresolved instead of paying out on a hunch.</p></li>
+        <li><h3>Anyone can check the fingerprint</h3><p>A SHA-256 hash of the full resolution record is stored with the market on NEAR.</p></li>
+      </ul>
+      <div>
+<pre class="rec" aria-label="Example resolution record"><span class="k">"outcome"</span>: "NO",
+<span class="k">"method"</span>: "rule",
+<span class="k">"reasoning"</span>: "Price 3.74 is below 3.84",
+<span class="k">"data"</span>: {
+  <span class="k">"coin"</span>: "near",
+  <span class="k">"price_usd"</span>: 3.747451,
+  <span class="k">"source"</span>: "CoinGecko market_chart/range"
+},
+<span class="k">"sources"</span>: [ { "title": "near price history", ... } ],
+<span class="k">"evidence_hash"</span>: "sha256 of this record, stored on-chain"</pre>
+        <p class="cap">An example resolution record. The real ones are saved by the agent for every settled market.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="agent">
+  <div class="in">
+    <h2 class="h">The resolver agent gets paid for doing the job</h2>
+    <p class="sub">A 2% fee is taken from the pool when a market resolves. 30% of it goes straight to the agent's account, 70% to the treasury. Both are visible on the Stats page.</p>
+    <div class="fee">
+      <div class="fr">
+        <div class="lb"><span>A 10 NEAR pool</span><span><b>9.8 NEAR</b> to winners, <b>0.2 NEAR</b> fee</span></div>
+        <div class="fb"><div class="f1" style="width:98%">Winners 98%</div><div class="f2" style="width:2%;padding:0"></div></div>
+      </div>
+      <div class="fr">
+        <div class="lb"><span>The 0.2 NEAR fee</span><span><b>0.14 NEAR</b> treasury, <b>0.06 NEAR</b> resolver agent</span></div>
+        <div class="fb"><div class="f2" style="width:70%">Treasury 70%</div><div class="f3" style="width:30%">Agent 30%</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="markets" style="background:var(--s)">
+  <div class="in">
+    <h2 class="h">Open markets right now</h2>
+    <p class="sub">Crypto, music and football, on NEAR testnet.</p>
+    <div class="mk" id="mk"></div>
+    <div class="cta" style="margin-top:32px"><a class="btn p" href="app.html#markets" style="color:#000">See all markets</a></div>
+  </div>
+</section>
+
+<section class="end dk">
+  <div class="in">
+    <h2>Pick a question. Back your answer.</h2>
+    <div class="cta"><a class="btn p" href="app.html">Launch app</a><a class="btn o" href="https://github.com/zoelaenski/ctrl-predicts" target="_blank" rel="noopener noreferrer">View the code</a></div>
+  </div>
+</section>
+</main>
+
+<footer class="ft dk">
+  <div class="in">
+    <div>
+      <a class="logo" href="./"><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><path d="M17.5 6.4A8.6 8.6 0 1 0 17.5 19.6" fill="none" stroke="#00EC97" stroke-width="3.6" stroke-linecap="round"/><circle cx="22.7" cy="13" r="2" fill="currentColor"/></svg>CTRL</a>
+      <p class="mu" style="margin-top:12px;font-size:14px">Every fact is a market. Built on NEAR for NEAR HACKATHON.</p>
+      <p class="mu" style="margin-top:8px;font-size:14px">Testnet only. No real funds.</p>
+    </div>
+    <div><h4>Product</h4><ul><li><a href="app.html#markets">Markets</a></li><li><a href="app.html#portfolio">Portfolio</a></li><li><a href="app.html#stats">Stats</a></li></ul></div>
+    <div><h4>Links</h4><ul>
+      <li><a id="xf" class="xl" hidden target="_blank" rel="noopener noreferrer"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>Follow on X</a></li>
+      <li><a href="https://github.com/zoelaenski/ctrl-predicts" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+      <li><a href="https://testnet.nearblocks.io/address/ctrlpredicts.testnet" target="_blank" rel="noopener noreferrer">Contract on testnet explorer</a></li>
+    </ul></div>
+  </div>
+</footer>
+
+<script>
+const X_URL = 'https://x.com/ctrl_predicts';
 const qs = new URLSearchParams(location.search);
-if (qs.get('api')) store.set('ctrl_api', qs.get('api'));
-const API = (qs.get('api') || store.get('ctrl_api') || 'https://ctrl-predicts-api.onrender.com').replace(/\/$/, '');
+const API = (qs.get('api') || 'https://ctrl-predicts-api.onrender.com').replace(/\/$/, '');
+const $ = id => document.getElementById(id);
+if (X_URL) for (const id of ['xh', 'xf']) { $(id).href = X_URL; $(id).hidden = false; }
 
-/* ---------- helpers ---------- */
-const $ = id => document.getElementById(id), app = $('app');
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const E24 = BigInt('1000000000000000000000000'), E18 = BigInt('1000000000000000000');
-const toNear = y => Number(BigInt(y || '0') / E18) / 1e6;                 // yocto string -> NEAR number
-const toYocto = s => { const [i, fr = ''] = String(s).trim().split('.'); return (BigInt(i || '0') * E24 + BigInt((fr + '0'.repeat(24)).slice(0, 24))).toString(); };
-const f = n => Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 });
-const cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
-const when = ms => new Date(ms).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-const safeUrl = u => /^https?:\/\//i.test(u) ? esc(u) : null;
-const live = t => { $('live').textContent = t; };
-const liveHtml = t => { $('live').innerHTML = t; };
-const inline = s => s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-function md(t) {
-  let out = '', ul = false;
-  for (const ln of esc(t).split('\n')) {
-    const li = /^\s*[-*]\s+(.*)/.exec(ln);
-    if (li) { if (!ul) { out += '<ul class="col" style="padding-left:18px;gap:4px">'; ul = true; } out += '<li>' + inline(li[1]) + '</li>'; continue; }
-    if (ul) { out += '</ul>'; ul = false; }
-    const h = /^#{1,6}\s+(.*)/.exec(ln);
-    if (h) out += '<h3 style="font-size:16px;margin-top:6px">' + inline(h[1]) + '</h3>';
-    else if (ln.trim()) out += '<p>' + inline(ln) + '</p>';
+const E24 = 10n ** 24n;
+const near = y => { try { const n = BigInt(y); const f = (n % E24) / 10n ** 22n; return (n / E24).toString() + '.' + f.toString().padStart(2, '0'); } catch { return '0.00'; } };
+async function get(path) {
+  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 20000);
+  try { const r = await fetch(API + path, { signal: ctl.signal }); if (!r.ok) throw new Error(r.status); return await r.json(); } finally { clearTimeout(t); }
+}
+function poolBar(m, yEl, nEl) {
+  const y = BigInt(m.yes_pool), n = BigInt(m.no_pool), t = y + n;
+  const yp = t === 0n ? 50 : Number((y * 1000n) / t) / 10;
+  yEl.style.width = yp + '%'; nEl.style.width = (100 - yp) + '%';
+}
+function closes(ms) {
+  const d = ms - Date.now(); if (d <= 0) return 'Closed';
+  const h = d / 36e5; if (h < 1) return 'Closes in under an hour';
+  if (h < 48) return 'Closes in ' + Math.round(h) + ' hours';
+  return 'Closes in ' + Math.round(h / 24) + ' days';
+}
+
+get('/api/stats').then(s => {
+  $('st-m').textContent = s.markets_total;
+  $('st-v').textContent = near(s.total_volume);
+  $('st-f').textContent = near(s.fees_collected);
+  $('st-a').textContent = near(s.resolver_earned);
+  $('strip').hidden = false;
+}).catch(() => {});
+
+get('/api/entries').then(rows => {
+  const ms = rows.map(r => r.market);
+  const m1 = ms.find(m => m.id === 1 && m.status === 'resolved' && m.outcome);
+  if (m1) {
+    $('sp-q').textContent = m1.question;
+    $('sp-out').textContent = m1.outcome;
+    if (m1.refund) $('sp-out').textContent = m1.outcome + ' (refunded)';
+    if (m1.evidence_hash) $('sp-hash').textContent = 'Evidence hash ' + m1.evidence_hash;
+    poolBar(m1, $('sp-y'), $('sp-n'));
+    $('sp-yv').textContent = near(m1.yes_pool) + ' NEAR'; $('sp-nv').textContent = near(m1.no_pool) + ' NEAR';
+    $('sp-pool').hidden = false; $('sp-cap').hidden = false;
   }
-  return out + (ul ? '</ul>' : '');
-}
-const sourcesList = (src = []) => src.length ? '<ul class="col" style="padding-left:18px;gap:6px">' + src.map(s => { const u = safeUrl(s.url); return '<li>' + (u ? `<a href="${u}" target="_blank" rel="noopener noreferrer">${esc(s.title)}</a>` : esc(s.title)) + '</li>'; }).join('') + '</ul>' : '<p class="mu">No sources recorded.</p>';
-
-/* ---------- state ---------- */
-const S = { rows: null, stats: null, err: null, account: null, wallet: null, connector: null, bal: null, positions: null, side: 'YES', cat: 'All', q: '', detail: null, detailId: null };
-const fee = () => (S.stats ? S.stats.fee_bps : 200) / 10000;
-
-async function api(path) {
-  const r = await fetch(API + path);
-  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'API ' + r.status);
-  return r.json();
-}
-async function loadList() {
-  try {
-    const [rows, stats] = await Promise.all([api('/api/entries'), api('/api/stats')]);
-    S.rows = rows.map(r => ({ m: norm(r.market), article: r.article })); S.stats = stats; S.err = null;
-  } catch (e) { S.err = e.message || String(e); }
-}
-function norm(m) {
-  return { id: m.id, q: m.question, cat: m.category, closes: m.closes_at_ms, st: m.status, out: m.outcome, refund: m.refund,
-    yy: m.yes_pool, nn: m.no_pool, y: toNear(m.yes_pool), n: toNear(m.no_pool), feePaid: m.fee_paid, hash: m.evidence_hash };
-}
-async function loadBalance() {
-  S.bal = null;
-  if (!S.account) return;
-  try {
-    const r = await fetch(RPC, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'query', params: { request_type: 'view_account', finality: 'final', account_id: S.account } }) });
-    S.bal = toNear((await r.json()).result.amount);
-  } catch { S.bal = null; }
-}
-async function loadPositions() {
-  S.positions = null;
-  if (!S.account) return;
-  try { S.positions = await api('/api/positions/' + encodeURIComponent(S.account)); } catch (e) { S.positions = []; live('Could not load your positions: ' + e.message); }
-}
-
-/* ---------- wallet ---------- */
-async function getConnector() {
-  if (S.connector) return S.connector;
-  const mod = window.__nearConnectStub || await import(NEAR_CONNECT_URL);
-  S.connector = new mod.NearConnector({ network: 'testnet' });
-  S.connector.on?.('wallet:signOut', () => { S.wallet = null; S.account = null; store.del('ctrl_wallet'); hdr(); route(); });
-  return S.connector;
-}
-async function setWallet(w) {
-  S.wallet = w;
-  const a = await w.getAccounts();
-  S.account = a[0]?.accountId || null;
-  store.set('ctrl_wallet', '1');
-  await Promise.all([loadBalance(), loadPositions()]);
-  hdr();
-}
-async function connect() {
-  try { live('Opening wallet…'); const c = await getConnector(); await setWallet(await c.connect()); live('Wallet connected: ' + S.account); route(); }
-  catch (e) { live('Wallet connection failed: ' + (e.message || e)); }
-}
-async function disconnect() {
-  try { const c = await getConnector(); await c.disconnect(S.wallet); } catch {}
-  S.wallet = null; S.account = null; S.bal = null; S.positions = null; store.del('ctrl_wallet'); hdr(); route();
-}
-async function restoreWallet() {
-  if (!store.get('ctrl_wallet')) return;
-  try { const c = await getConnector(); const w = await c.wallet(); if (w) { await setWallet(w); route(); } } catch {}
-}
-async function callContract(methodName, args, depositYocto) {
-  if (!S.wallet) throw new Error('Connect your wallet first.');
-  const res = await S.wallet.signAndSendTransaction({
-    receiverId: CONTRACT,
-    actions: [{ type: 'FunctionCall', params: { methodName, args, gas: '30000000000000', deposit: depositYocto } }],
-  });
-  return res?.transaction?.hash || res?.transaction_outcome?.id || null;
-}
-const txLink = h => h ? ` <a href="${EXPLORER}/txns/${esc(h)}" target="_blank" rel="noopener noreferrer">View transaction</a>` : '';
-
-/* ---------- math ---------- */
-const total = m => m.y + m.n;
-const pct = m => total(m) > 0 ? Math.round(m.y / total(m) * 100) : 50;
-const est = (m, s, a) => a * (1 - fee()) * (total(m) + a) / ((s === 'YES' ? m.y : m.n) + a);
-function payoutOf(m, pos) {              // exact payout in yocto (BigInt) for a position, mirrors the contract
-  const y = BigInt(pos.yes), n = BigInt(pos.no);
-  if (m.refund) return y + n;
-  const stake = m.out === 'YES' ? y : n, win = BigInt(m.out === 'YES' ? m.yy : m.nn);
-  if (stake === BigInt(0) || win === BigInt(0)) return BigInt(0);
-  return stake * (BigInt(m.yy) + BigInt(m.nn) - BigInt(m.feePaid)) / win;
-}
-const bar = p => `<div class="bar" role="img" aria-label="${p} percent yes"><i style="width:${p}%;background:var(--g)"></i><i style="flex:1;background:var(--no)"></i></div>`;
-const stLabel = m => m.st === 'open' ? 'Closes ' + when(m.closes) : m.st === 'closed' ? 'Closed, awaiting AI agent' : 'Resolved ' + m.out;
-
-/* ---------- views ---------- */
-const card = r => {
-  const m = r.m, p = pct(m), o = m.st === 'open';
-  return `<div class="c col" style="gap:14px"><div class="sp"><span class="mu">${esc(cap(m.cat))}</span><strong>${esc(stLabel(m))}</strong></div>
-<h3 style="font-size:18px;line-height:1.3;min-height:70px"><a href="#market-${m.id}">${esc(m.q)}</a></h3>
-<div class="r" style="gap:8px;align-items:baseline"><strong class="gt" style="font-size:34px;line-height:1">${total(m) > 0 ? p + '%' : '–'}</strong><span class="mu">${total(m) > 0 ? 'chance of yes' : 'no bets yet'}</span></div>${bar(p)}
-<div class="sp"><span class="mu">Pool ${f(total(m))} NEAR</span><span class="mu">Resolved by AI agent</span></div>
-${o ? `<div class="r"><a class="btn yes" data-side="YES" href="#market-${m.id}" style="flex:1">Yes</a><a class="btn no" data-side="NO" href="#market-${m.id}" style="flex:1">No</a></div>` : `<a class="btn sc" href="#market-${m.id}">${m.st === 'resolved' ? 'View resolution' : 'View market'}</a>`}</div>`;
-};
-const grid = () => {
-  const rows = (S.rows || []).filter(r => (S.cat === 'All' || r.m.cat === S.cat) && r.m.q.toLowerCase().includes(S.q));
-  return rows.map(card).join('') || '<p class="mu">No markets match. Try another category or search.</p>';
-};
-function errPanel() {
-  return `<div class="c col"><h2 style="font-size:20px">Can't reach the Ctrl Predicts API</h2><p class="mu">Tried ${esc(API)}. Error: ${esc(S.err)}</p><p class="mu">Start the API (<code>npm start</code> in the agent folder) or open this page with <code>?api=https://your-api-address</code>.</p><button class="sc" id="retry" style="align-self:flex-start">Try again</button></div>`;
-}
-function home() {
-  if (S.err && !S.rows) { app.innerHTML = errPanel(); return; }
-  if (!S.rows) { app.innerHTML = '<p class="mu">Loading markets…</p>'; return; }
-  const cats = ['All', ...new Set(['crypto', 'entertainment', 'sports', 'other', ...S.rows.map(r => r.m.cat)])];
-  app.innerHTML = `<h1 style="font-size:clamp(30px,5vw,44px);line-height:1.1">Predict anything.</h1><p class="mu" style="font-size:15px;margin:8px 0 24px">Pick YES or NO. Winners split the pool. An AI agent resolves each market and shows its evidence. Everything runs on NEAR testnet.</p>
-<div class="sp" style="border-bottom:1px solid var(--ln);margin-bottom:20px;flex-wrap:wrap"><div class="r" style="gap:12px">${cats.map(c => `<button class="t" data-cat="${esc(c)}"${c === S.cat ? ' aria-current="true"' : ''}>${esc(cap(c))}</button>`).join('')}</div>
-<label for="q" style="position:absolute;left:-9999px">Search markets</label><input id="q" type="search" placeholder="Search markets" style="width:240px;max-width:100%;margin-bottom:6px"></div><div class="g3" id="grid">${grid()}</div>`;
-  $('q').value = S.q;
-}
-const betPanel = m => `<div class="c col"><div class="r"><button class="yes" id="sy" aria-pressed="true" style="flex:1"></button><button class="no" id="sn" aria-pressed="false" style="flex:1"></button></div>
-<label class="mu" for="amt">You pay (NEAR)</label><input id="amt" inputmode="decimal" value="1" aria-describedby="err"><span class="mu">${S.account ? 'Balance ' + (S.bal == null ? '…' : f(S.bal)) + ' NEAR' : 'Connect a testnet wallet to bet'}</span>
-<div class="col" id="quote" style="gap:6px"></div><button id="go" style="min-height:48px"></button><p class="mu" id="err" role="alert"></p>
-<p class="mu">The payout is an estimate and changes as more bets come in. If nobody bets on the other side, you get your stake back.</p></div>`;
-function resPanel(m, res) {
-  if (!res) return `<div class="c col"><h2 style="font-size:22px">Resolved ${esc(m.out)}</h2><p class="mu">The evidence is still loading.</p></div>`;
-  const d = res.data, rule = res.method === 'rule';
-  return `<div class="c col" style="gap:14px"><span class="env" style="align-self:flex-start">${rule ? 'Settled by a fixed rule on price data' : 'Resolved by AI agent'}</span>
-<h2 style="font-size:24px">Outcome: ${esc(res.outcome)}</h2><p>${esc(res.reasoning)}</p>
-${d ? `<p class="mu">Price used: $${esc(f(d.price_usd))} at ${esc(new Date(d.observed_at).toUTCString())} (${esc(d.source)})</p>` : ''}
-<p class="mu">Sources</p>${sourcesList(res.sources)}
-<p class="mu">Evidence hash recorded on-chain: <code style="word-break:break-all">${esc(res.evidence_hash)}</code></p>
-<p class="mu">Resolved ${esc(new Date(res.resolved_at).toUTCString())}. Fee taken: ${f(toNear(m.feePaid))} NEAR.</p></div>`;
-}
-function claimBox(m) {
-  if (!S.account) return '<div class="c col"><p>Connect your wallet to see if you won.</p></div>';
-  const pos = (S.positions || []).find(p => p.market_id === m.id);
-  if (!pos) return '<div class="c col"><p class="mu">You have no position in this market.</p></div>';
-  const pay = payoutOf(m, pos);
-  if (pos.claimed) return '<div class="c col"><p class="mu">You already claimed your winnings.</p></div>';
-  if (pay === BigInt(0)) return '<div class="c col"><p class="mu">Your side did not win this market.</p></div>';
-  return `<div class="c col"><h3>You won ${f(toNear(pay.toString()))} NEAR</h3><button class="yes" id="claim" data-id="${m.id}" style="min-height:48px">Claim winnings</button><p class="mu" id="err" role="alert"></p></div>`;
-}
-async function detail(id) {
-  const r = (S.rows || []).find(x => x.m.id === id);
-  if (!r && S.err) { app.innerHTML = errPanel(); return; }
-  app.innerHTML = '<p class="mu">Loading market…</p>';
-  let d;
-  try { d = await api('/api/entries/' + id); } catch (e) { app.innerHTML = `<p><a href="#markets" class="mu">Back to markets</a></p><p>Could not load this market: ${esc(e.message)}</p>`; return; }
-  if (location.hash.slice(1) !== 'market-' + id) return;
-  const m = norm(d.market), a = d.article; S.detail = { m, a, res: d.resolution }; S.detailId = id;
-  const p = pct(m), o = m.st === 'open';
-  if (S.positions == null && S.account) await loadPositions();
-  const articleHtml = a ? `<div class="c col" style="gap:10px"><div class="sp"><h3 style="font-size:18px">${esc(a.title)}</h3><span class="env">AI-written</span></div><p>${esc(a.summary)}</p>${md(a.body_md)}<p class="mu">Sources</p>${sourcesList(a.sources)}<p class="mu">Written ${esc(new Date(a.updated_at).toUTCString())} by ${esc(a.model)}</p></div>` : '<div class="c"><p class="mu">The AI agent is still writing this entry. Check back in a minute.</p></div>';
-  const side = o ? betPanel(m) : m.st === 'resolved' ? resPanel(m, d.resolution) + claimBox(m) : '<div class="c col"><h2 style="font-size:22px">Betting is closed</h2><p class="mu">The AI agent is gathering evidence and will resolve this market shortly. This page updates when it does.</p></div>';
-  app.innerHTML = `<p><a href="#markets" class="mu">Back to markets</a></p><div class="two" style="margin-top:12px"><div class="col" style="gap:14px;min-width:0">
-<div class="r"><span class="mu">${esc(cap(m.cat))}</span><strong>${esc(stLabel(m))}</strong></div><h1 style="font-size:clamp(24px,4vw,32px);line-height:1.2">${esc(m.q)}</h1>
-<div class="c col" style="gap:10px"><div class="sp"><strong style="font-size:30px">${total(m) > 0 ? p + '% YES' : 'No bets yet'}</strong><span class="mu">Market odds</span></div>${bar(p)}<div class="sp"><span>YES pool <strong class="gt">${f(m.y)} NEAR</strong></span><span>NO pool <strong>${f(m.n)} NEAR</strong></span></div></div>
-${articleHtml}</div><div class="col">${side}</div></div>`;
-  if (o) quote();
-}
-function quote() {
-  const m = S.detail?.m; if (!m || m.st !== 'open' || !$('amt')) return;
-  const a = parseFloat($('amt').value), y = S.side === 'YES', ok = a >= 0.1 && (S.bal == null || a <= S.bal);
-  $('sy').classList.toggle('sel', y); $('sn').classList.toggle('sel', !y);
-  $('sy').textContent = (y ? '✓ ' : '') + 'Yes'; $('sn').textContent = (y ? '' : '✓ ') + 'No';
-  $('sy').setAttribute('aria-pressed', y); $('sn').setAttribute('aria-pressed', !y); $('err').textContent = '';
-  $('quote').innerHTML = ok ? `<div class="sp"><span class="mu">Fee</span><span>${f(fee() * 100)}% of the pool at resolution</span></div><div class="sp"><span class="mu">${S.side} pool after your bet</span><span>${f((y ? m.y : m.n) + a)} NEAR</span></div><div class="sp"><span>If ${S.side} wins you get about</span><strong>${f(est(m, S.side, a))} NEAR</strong></div>` : '<p class="mu">Enter an amount of at least 0.1 NEAR, within your balance.</p>';
-  $('go').textContent = S.account ? 'Place ' + S.side + ' bet for ' + (ok ? f(a) : '…') + ' NEAR' : 'Connect wallet to bet'; $('go').className = y ? 'yes' : 'no';
-}
-async function place() {
-  if (!S.account) { await connect(); return; }
-  const m = S.detail.m, a = parseFloat($('amt').value);
-  if (!(a >= 0.1)) { $('err').textContent = 'Enter at least 0.1 NEAR.'; return; }
-  if (S.bal != null && a > S.bal) { $('err').textContent = 'Not enough balance for this bet.'; return; }
-  try {
-    live('Waiting for wallet approval…');
-    const h = await callContract('bet', { market_id: m.id, side: S.side }, toYocto($('amt').value));
-    await Promise.all([loadList(), loadBalance(), loadPositions()]); hdr();
-    await detail(m.id); liveHtml('Bet placed: ' + f(a) + ' NEAR on ' + S.side + '.' + txLink(h));
-  } catch (e) { live('Bet failed: ' + (e.message || e)); }
-}
-async function claim(id) {
-  try {
-    live('Waiting for wallet approval…');
-    const h = await callContract('claim', { market_id: Number(id) }, '0');
-    await Promise.all([loadBalance(), loadPositions()]); hdr();
-    await detail(Number(id)); liveHtml('Winnings claimed.' + txLink(h));
-  } catch (e) { live('Claim failed: ' + (e.message || e)); }
-}
-async function port() {
-  if (S.err && !S.rows) { app.innerHTML = errPanel(); return; }
-  if (!S.account) { app.innerHTML = '<h1 style="font-size:clamp(28px,4vw,36px)">Portfolio</h1><p class="mu" style="margin-top:12px">Connect your wallet to see your positions.</p>'; return; }
-  await loadPositions();
-  const rows = (S.positions || []).map(p => {
-    const r = (S.rows || []).find(x => x.m.id === p.market_id); if (!r) return '';
-    const m = r.m, y = toNear(p.yes), n = toNear(p.no), sideTxt = [y > 0 ? 'YES ' + f(y) : '', n > 0 ? 'NO ' + f(n) : ''].filter(Boolean).join(' / ');
-    let status = m.st === 'open' ? 'Open, ' + stLabel(m).toLowerCase() : m.st === 'closed' ? 'Awaiting resolution' : 'Resolved ' + m.out, pay = '';
-    if (m.st === 'resolved') {
-      const w = payoutOf(m, p);
-      pay = p.claimed ? 'Claimed' : w > BigInt(0) ? `<button class="yes" data-claim="${m.id}">Claim ${f(toNear(w.toString()))} NEAR</button>` : 'Lost';
-    }
-    return `<div class="c sp"><div><a href="#market-${m.id}"><strong>${esc(m.q)}</strong></a><p class="mu">${esc(sideTxt)} NEAR staked. ${esc(status)}</p></div><div style="text-align:right">${pay}</div></div>`;
-  }).join('');
-  app.innerHTML = `<h1 style="font-size:clamp(28px,4vw,36px)">Portfolio</h1><div class="g3" style="margin:20px 0"><div class="c"><span class="mu">Account</span><h2 style="font-size:20px;word-break:break-all">${esc(S.account)}</h2></div><div class="c"><span class="mu">Balance</span><h2 style="font-size:30px">${S.bal == null ? '…' : f(S.bal)} NEAR</h2></div></div><h2 style="font-size:18px;margin-bottom:12px">Your positions</h2><div class="col">${rows || '<p class="mu">No positions yet. <a href="#markets">Browse markets</a> and place your first bet.</p>'}</div>`;
-}
-function statsView() {
-  if (S.err && !S.rows) { app.innerHTML = errPanel(); return; }
-  const s = S.stats; if (!s) { app.innerHTML = '<p class="mu">Loading…</p>'; return; }
-  const tile = (k, v) => `<div class="c"><span class="mu">${k}</span><h2 style="font-size:28px">${v}</h2></div>`;
-  app.innerHTML = `<h1 style="font-size:clamp(28px,4vw,36px)">Stats</h1><p class="mu" style="margin:8px 0 20px">How the platform earns. When a market resolves, ${f(s.fee_bps / 100)}% of the pool is taken as a fee: 70% to the project treasury and 30% to the AI resolver agent, which pays for its own work.</p>
-<div class="g3">${tile('Markets', s.markets_total)}${tile('Total volume', f(toNear(s.total_volume)) + ' NEAR')}${tile('Fees collected', f(toNear(s.fees_collected)) + ' NEAR')}${tile('Treasury', f(toNear(s.treasury_balance)) + ' NEAR')}${tile('Resolver agent earned', f(toNear(s.resolver_earned)) + ' NEAR')}</div>
-<p class="mu" style="margin-top:16px">Contract: <a href="${EXPLORER}/address/${CONTRACT}" target="_blank" rel="noopener noreferrer">${CONTRACT}</a></p>`;
-}
-function hdr() {
-  const h = location.hash.slice(1) || 'markets';
-  $('n1').toggleAttribute('aria-current', h !== 'portfolio' && h !== 'stats'); $('n2').toggleAttribute('aria-current', h === 'portfolio'); $('n3').toggleAttribute('aria-current', h === 'stats');
-  $('bl').textContent = S.account && S.bal != null ? f(S.bal) + ' NEAR' : '';
-  $('conn').textContent = S.account || 'Connect wallet';
-  $('conn').title = S.account ? 'Click to disconnect' : '';
-}
-function route() {
-  const h = location.hash.slice(1) || 'markets'; hdr();
-  const mm = /^market-(\d+)$/.exec(h);
-  if (mm) detail(Number(mm[1])); else if (h === 'portfolio') port(); else if (h === 'stats') statsView(); else home();
-  window.scrollTo(0, 0);
-}
-addEventListener('hashchange', route);
-document.addEventListener('click', e => {
-  const t = e.target.closest('button,a'); if (!t) return;
-  if (t.dataset.side) S.side = t.dataset.side;
-  if (t.dataset.cat) { S.cat = t.dataset.cat; home(); return; }
-  if (t.id === 'sy' || t.id === 'sn') { S.side = t.id === 'sy' ? 'YES' : 'NO'; quote(); }
-  else if (t.id === 'go') place();
-  else if (t.id === 'claim') claim(t.dataset.id);
-  else if (t.dataset.claim) claim(t.dataset.claim);
-  else if (t.id === 'retry') { S.err = null; loadList().then(route); }
-  else if (t.id === 'conn') { S.account ? disconnect() : connect(); }
+  const open = ms.filter(m => m.status === 'open').sort((a, b) => b.id - a.id).slice(0, 6);
+  const box = $('mk');
+  if (!open.length) { box.innerHTML = '<p class="mu">New markets are on the way. Open the app to see every market.</p>'; return; }
+  for (const m of open) {
+    const a = document.createElement('a'); a.className = 'mc'; a.href = 'app.html#market-' + m.id;
+    const top = document.createElement('div'); top.className = 'pl'; top.style.justifyContent = 'flex-start'; top.style.gap = '10px';
+    const chip = document.createElement('span'); chip.className = 'chip'; chip.textContent = m.category;
+    const cl = document.createElement('span'); cl.textContent = closes(m.closes_at_ms);
+    top.append(chip, cl);
+    const h = document.createElement('h3'); h.textContent = m.question;
+    const bar = document.createElement('div'); bar.className = 'bar';
+    const y = document.createElement('i'); y.className = 'y'; const n = document.createElement('i'); n.className = 'n'; bar.append(y, n);
+    poolBar(m, y, n);
+    const pl = document.createElement('div'); pl.className = 'pl';
+    const total = BigInt(m.yes_pool) + BigInt(m.no_pool);
+    pl.innerHTML = '<span></span><span></span>';
+    pl.children[0].textContent = total === 0n ? 'No bets yet' : 'YES ' + near(m.yes_pool);
+    pl.children[1].textContent = total === 0n ? '' : 'NO ' + near(m.no_pool);
+    a.append(top, h, bar, pl); box.append(a);
+  }
+}).catch(() => {
+  $('mk').innerHTML = '<p class="mu">The market list is waking up. Open the app to see every market.</p>';
 });
-document.addEventListener('input', e => {
-  if (e.target.id === 'amt') quote();
-  if (e.target.id === 'q') { S.q = e.target.value.toLowerCase(); $('grid').innerHTML = grid(); }
-});
-$('foot').textContent = 'Contract ' + CONTRACT + ' on NEAR testnet. API: ' + API;
-$('ct').href = EXPLORER + '/address/' + CONTRACT;
-if (X_URL) { for (const id of ['xh', 'xf']) { $(id).href = X_URL; $(id).hidden = false; } }
-hdr();
-await loadList(); route();
-restoreWallet();
-setInterval(async () => { const h = location.hash.slice(1) || 'markets'; if (h === 'markets' && document.activeElement?.id !== 'q') { await loadList(); if (S.rows) home(); } }, 30000);
 </script>
 </body>
 </html>
