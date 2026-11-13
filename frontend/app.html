@@ -194,17 +194,35 @@ const bar = p => `<div class="bar" role="img" aria-label="${p} percent yes"><i s
 const stLabel = m => m.st === 'open' ? 'Closes ' + when(m.closes) : m.st === 'closed' ? 'Closed, awaiting AI agent' : 'Resolved ' + m.out;
 
 /* ---------- views ---------- */
+const mine = id => (S.positions || []).find(p => p.market_id === id);
+function myTag(m) {
+  const p = mine(m.id); if (!p) return '';
+  const y = toNear(p.yes), n = toNear(p.no), side = [y > 0 ? 'YES ' + f(y) : '', n > 0 ? 'NO ' + f(n) : ''].filter(Boolean).join(' / ');
+  let res = '';
+  if (m.st === 'resolved') { const w = payoutOf(m, p); res = p.claimed ? ' Claimed.' : w > BigInt(0) ? ' You won ' + f(toNear(w.toString())) + ' NEAR.' : ' You lost.'; }
+  return `<div class="r" style="gap:8px;margin-top:-4px"><span class="k gt">Your bet</span><span>${esc(side)} NEAR.${esc(res)}</span></div>`;
+}
 const card = r => {
   const m = r.m, p = pct(m), o = m.st === 'open';
   return `<div class="c col" style="gap:14px"><div class="sp"><span class="mu">${esc(cap(m.cat))}</span><strong>${esc(stLabel(m))}</strong></div>
-<h3 style="font-size:18px;line-height:1.3;min-height:70px"><a href="#market-${m.id}">${esc(m.q)}</a></h3>
+<h3 style="font-size:18px;line-height:1.3;min-height:70px"><a href="#market-${m.id}">${esc(m.q)}</a></h3>${myTag(m)}
 <div class="r" style="gap:8px;align-items:baseline"><strong class="gt" style="font-size:34px;line-height:1">${total(m) > 0 ? p + '%' : '–'}</strong><span class="mu">${total(m) > 0 ? 'chance of yes' : 'no bets yet'}</span></div>${bar(p)}
 <div class="sp"><span class="mu">Pool ${f(total(m))} NEAR</span><span class="mu">Resolved by AI agent</span></div>
 ${o ? `<div class="r"><a class="btn yes" data-side="YES" href="#market-${m.id}" style="flex:1">Yes</a><a class="btn no" data-side="NO" href="#market-${m.id}" style="flex:1">No</a></div>` : `<a class="btn sc" href="#market-${m.id}">${m.st === 'resolved' ? 'View resolution' : 'View market'}</a>`}</div>`;
 };
+const section = (title, note, rows) => rows.length ? `<section style="margin-top:32px"><div class="sp" style="align-items:baseline;margin-bottom:14px;flex-wrap:wrap"><h2 style="font-size:22px">${esc(title)} <span class="mu" style="font-size:15px;font-weight:400">${rows.length}</span></h2>${note ? `<span class="mu">${esc(note)}</span>` : ''}</div><div class="g3">${rows.map(card).join('')}</div></section>` : '';
 const grid = () => {
   const rows = (S.rows || []).filter(r => (S.cat === 'All' || r.m.cat === S.cat) && r.m.q.toLowerCase().includes(S.q));
-  return rows.map(card).join('') || '<p class="mu">No markets match. Try another category or search.</p>';
+  if (!rows.length) return '<p class="mu">No markets match. Try another category or search.</p>';
+  const open = rows.filter(r => r.m.st === 'open').sort((a, b) => a.m.closes - b.m.closes);
+  const closed = rows.filter(r => r.m.st === 'closed');
+  const done = rows.filter(r => r.m.st === 'resolved').sort((a, b) => b.m.id - a.m.id);
+  const signed = !!S.account && S.positions !== null;
+  return (signed
+    ? section('Your active bets', 'Markets you have already bet on', open.filter(r => mine(r.m.id))) + section('Open to bet', 'Markets you have not bet on yet', open.filter(r => !mine(r.m.id)))
+    : section('Active markets', 'Open for bets now', open))
+    + section('Awaiting the AI agent', 'Betting is closed, the agent is checking the evidence', closed)
+    + section('Resolved', 'Settled with evidence', done);
 };
 function errPanel() {
   return `<div class="c col"><h2 style="font-size:20px">Can't reach the Ctrl Predicts API</h2><p class="mu">Tried ${esc(API)}. Error: ${esc(S.err)}</p><p class="mu">Start the API (<code>npm start</code> in the agent folder) or open this page with <code>?api=https://your-api-address</code>.</p><button class="sc" id="retry" style="align-self:flex-start">Try again</button></div>`;
@@ -215,7 +233,7 @@ function home() {
   const cats = ['All', ...new Set(['crypto', 'entertainment', 'sports', 'other', ...S.rows.map(r => r.m.cat)])];
   app.innerHTML = `<h1 style="font-size:clamp(30px,5vw,44px);line-height:1.1">Predict anything.</h1><p class="mu" style="font-size:15px;margin:8px 0 24px">Pick YES or NO. Winners split the pool. An AI agent resolves each market and shows its evidence. Everything runs on NEAR testnet.</p>
 <div class="sp" style="border-bottom:1px solid var(--ln);margin-bottom:20px;flex-wrap:wrap"><div class="r" style="gap:12px">${cats.map(c => `<button class="t" data-cat="${esc(c)}"${c === S.cat ? ' aria-current="true"' : ''}>${esc(cap(c))}</button>`).join('')}</div>
-<label for="q" style="position:absolute;left:-9999px">Search markets</label><input id="q" type="search" placeholder="Search markets" style="width:240px;max-width:100%;margin-bottom:6px"></div><div class="g3" id="grid">${grid()}</div>`;
+<label for="q" style="position:absolute;left:-9999px">Search markets</label><input id="q" type="search" placeholder="Search markets" style="width:240px;max-width:100%;margin-bottom:6px"></div><div id="grid">${grid()}</div>`;
   $('q').value = S.q;
 }
 const betPanel = m => `<div class="c col"><div class="r"><button class="yes" id="sy" aria-pressed="true" style="flex:1"></button><button class="no" id="sn" aria-pressed="false" style="flex:1"></button></div>
