@@ -13,7 +13,7 @@
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *,*:before,*:after{box-sizing:inherit}
 body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 "Instrument Sans",system-ui,sans-serif;font-variant-numeric:tabular-nums}
-h1,h2,h3,p,ul{margin:0}a{color:inherit}h3 a{text-decoration:none}
+h1,h2,h3,p,ul{margin:0}a{color:inherit}h3 a,h2 a{text-decoration:none}
 .w{max-width:1100px;margin:0 auto;padding:20px 16px 48px}
 .mu{color:var(--mu);font-size:13px}.gt{color:var(--gt)}
 .r{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -47,6 +47,29 @@ input{background:var(--bg);color:var(--tx);border:1px solid var(--bd);padding:0 
 .col{display:flex;flex-direction:column;gap:12px}
 @media(max-width:820px){.two{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:no-preference){.bar i{transition:width .3s}}
+
+/* app v2 */
+.cv{display:block;width:100%;height:auto;aspect-ratio:16/7;background:#000}
+.cd{display:flex;flex-direction:column;padding:0;overflow:hidden;border-radius:16px;transition:border-color .2s}
+.cd:hover{border-color:var(--bd)}
+.cb{padding:16px;display:flex;flex-direction:column;gap:12px;flex:1}
+.cb .push{margin-top:auto}
+.big{font-size:44px;line-height:1;letter-spacing:-.04em;font-weight:700}
+.pn{background:#000;color:#fff;border-radius:24px;padding:36px;display:grid;grid-template-columns:1.05fr .95fr;gap:36px;align-items:center;margin-bottom:28px;--bg:#000;--s:#111;--ln:#2a2a2a;--bd:#6B6B6B;--tx:#fff;--mu:#B3B3B3;--gt:#00EC97;--no:#fff;--onno:#000}
+.pn .cd{border-color:#2f2f2f}
+.pn .mu{color:#B3B3B3}
+@media(max-width:820px){.pn{grid-template-columns:1fr;padding:24px 18px;gap:24px;border-radius:20px}}
+.ev{background:#000;color:#fff;border:1px solid #2f2f2f;border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:14px;--mu:#B3B3B3;--gt:#00EC97;--bd:#6B6B6B}
+.ev .env{border-color:#6B6B6B;color:#B3B3B3}
+.ev code{color:#e8e8e8}
+.sch{display:inline-flex;align-items:center;min-height:36px;padding:0 14px;border:1px solid #3a3a3a;border-radius:999px;text-decoration:none;color:#fff;font-size:14px}
+.sch:hover{border-color:#fff}
+.sticky{position:sticky;top:84px}
+@media(max-width:820px){.sticky{position:static}}
+.sk{background:linear-gradient(90deg,var(--s) 0%,var(--ln) 50%,var(--s) 100%);background-size:200% 100%;border-radius:16px;min-height:300px;border:1px solid var(--ln)}
+@media(prefers-reduced-motion:no-preference){.sk{animation:sk 1.4s linear infinite}@keyframes sk{to{background-position:-200% 0}}}
+.t{min-height:44px}
+@media(max-width:560px){.hdi .env{display:none}}
 </style>
 </head>
 <body>
@@ -193,6 +216,61 @@ function payoutOf(m, pos) {              // exact payout in yocto (BigInt) for a
 const bar = p => `<div class="bar" role="img" aria-label="${p} percent yes"><i style="width:${p}%;background:var(--g)"></i><i style="flex:1;background:var(--no)"></i></div>`;
 const stLabel = m => m.st === 'open' ? 'Closes ' + when(m.closes) : m.st === 'closed' ? 'Closed, awaiting AI agent' : 'Resolved ' + m.out;
 
+
+/* ---------- covers: illustrated art generated from the question ---------- */
+let uid = 0;
+const subject = q => { const m = /^Will (?:the )?((?:[A-Z][\w.'-]*)(?: (?:[A-Z][\w.'-]*|de\b|of\b|FC\b))*)/.exec(q || ''); return m ? m[1] : ''; };
+const rngOf = seed => { let s = (seed * 2654435761 + 1) >>> 0 || 1; return () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296; };
+const kindOf = m => {
+  const q = m.q || '';
+  if (m.cat === 'crypto' || (/\$\s?\d/.test(q) && /(trade|price|above|below)/i.test(q))) return 'crypto';
+  if (m.cat === 'entertainment' || /(song|album|music video|single|tour|release date|concert)/i.test(q)) return 'music';
+  if (m.cat === 'sports' || /(premier league|goal|match|league|cup)/i.test(q)) return 'sports';
+  return 'other';
+};
+function nameText(name, x, y) {
+  if (!name) return '';
+  const words = name.split(' '), lines = name.length > 12 && words.length > 1 ? [words.slice(0, Math.ceil(words.length / 2)).join(' '), words.slice(Math.ceil(words.length / 2)).join(' ')] : [name];
+  const fs = Math.max(...lines.map(l => l.length)) <= 10 ? 28 : Math.max(...lines.map(l => l.length)) <= 14 ? 23 : 18;
+  return lines.map((l, i) => `<text x="${x}" y="${y + i * (fs + 4)}" fill="#fff" font-size="${fs}" font-weight="700" font-family="Instrument Sans,system-ui,sans-serif" letter-spacing="-.5">${esc(l)}</text>`).join('');
+}
+function cover(m) {
+  const id = 'cv' + (++uid), r = rngOf(m.id + 7), k = kindOf(m), name = subject(m.q);
+  let art = '';
+  if (k === 'crypto') {
+    const th = /\$\s?([\d,]+(?:\.\d+)?)/.exec(m.q || ''); const coin = (name || 'COIN').slice(0, 6).toUpperCase();
+    let y = 78, pts = []; for (let i = 0; i < 26; i++) { y += (r() - 0.5) * 26; y = Math.min(112, Math.max(34, y)); pts.push([14 + i * 11.8, y]); }
+    const line = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+    art = `<defs><linearGradient id="${id}a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#00EC97" stop-opacity=".28"/><stop offset="1" stop-color="#00EC97" stop-opacity="0"/></linearGradient></defs>
+<rect width="320" height="140" fill="#04130d"/>${[40, 70, 100].map(v => `<line x1="0" x2="320" y1="${v}" y2="${v}" stroke="#14382a" stroke-width="1"/>`).join('')}
+<path d="${line} L${pts[pts.length - 1][0].toFixed(1)} 140 L14 140 Z" fill="url(#${id}a)"/><path d="${line}" fill="none" stroke="#00EC97" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<line x1="0" x2="320" y1="62" y2="62" stroke="#fff" stroke-width="1.4" stroke-dasharray="5 5" opacity=".8"/>
+${th ? `<rect x="236" y="48" width="74" height="22" rx="11" fill="#fff"/><text x="273" y="63" text-anchor="middle" fill="#000" font-size="12" font-weight="700" font-family="Instrument Sans,system-ui,sans-serif">$${esc(th[1])}</text>` : ''}
+<text x="16" y="34" fill="#fff" font-size="26" font-weight="700" font-family="Instrument Sans,system-ui,sans-serif" letter-spacing="-.5">${esc(coin)}</text>`;
+  } else if (k === 'music') {
+    const bars = Array.from({ length: 26 }, (_, i) => { const hh = 8 + r() * 30; return `<rect x="${16 + i * 6}" y="${126 - hh}" width="3.4" height="${hh.toFixed(1)}" rx="1.7" fill="#00EC97" opacity="${(0.45 + r() * 0.55).toFixed(2)}"/>`; }).join('');
+    art = `<defs><radialGradient id="${id}a" cx=".3" cy=".25"><stop offset="0" stop-color="#2a2a2a"/><stop offset="1" stop-color="#0b0b0b"/></radialGradient></defs>
+<rect width="320" height="140" fill="#050505"/><circle cx="318" cy="-6" r="150" fill="#00EC97" opacity=".06"/>
+<circle cx="238" cy="72" r="62" fill="url(#${id}a)" stroke="#262626" stroke-width="2"/>${[52, 44, 36, 28].map(rr => `<circle cx="238" cy="72" r="${rr}" fill="none" stroke="#1a1a1a" stroke-width="1.4"/>`).join('')}
+<path d="M200 36 A46 46 0 0 1 268 40" fill="none" stroke="#fff" stroke-opacity=".12" stroke-width="3" stroke-linecap="round"/>
+<circle cx="238" cy="72" r="19" fill="#00EC97"/><circle cx="238" cy="72" r="3.4" fill="#000"/>${bars}${nameText(name, 16, 40)}`;
+  } else if (k === 'sports') {
+    art = `<rect width="320" height="140" fill="#06301f"/><rect x="0" y="0" width="320" height="140" fill="#0a4a30" opacity=".35"/>
+<g fill="none" stroke="#fff" stroke-opacity=".38" stroke-width="1.6"><rect x="10" y="10" width="300" height="120" rx="2"/><line x1="160" y1="10" x2="160" y2="130"/><circle cx="160" cy="70" r="24"/><rect x="10" y="38" width="38" height="64"/><rect x="272" y="38" width="38" height="64"/><rect x="10" y="54" width="14" height="32"/><rect x="296" y="54" width="14" height="32"/></g>
+<g transform="translate(236 66)"><circle r="21" fill="#fff"/><polygon points="0,-9 8.6,-2.8 5.3,7.3 -5.3,7.3 -8.6,-2.8" fill="#111"/><g stroke="#111" stroke-width="1.6"><line x1="0" y1="-9" x2="0" y2="-20"/><line x1="8.6" y1="-2.8" x2="19" y2="-6"/><line x1="5.3" y1="7.3" x2="12" y2="16"/><line x1="-5.3" y1="7.3" x2="-12" y2="16"/><line x1="-8.6" y1="-2.8" x2="-19" y2="-6"/></g></g>${nameText(name, 22, 70)}`;
+  } else {
+    art = `<rect width="320" height="140" fill="#000"/><path d="M262 30A50 50 0 1 0 262 110" fill="none" stroke="#00EC97" stroke-width="16" stroke-linecap="round" opacity=".9"/><circle cx="300" cy="70" r="8" fill="#fff"/>${nameText(name, 20, 70)}`;
+  }
+  return `<svg class="cv" viewBox="0 0 320 140" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">${art}</svg>`;
+}
+const rel = ms => {
+  const d = ms - Date.now(); if (d <= 0) return 'Closed';
+  const h = d / 36e5; if (h < 1) return 'Closes in under an hour';
+  if (h < 48) return 'Closes in ' + Math.round(h) + ' hours';
+  return 'Closes in ' + Math.round(h / 24) + ' days';
+};
+const skeleton = () => `<div class="sk" style="min-height:260px;border-radius:24px;margin-bottom:28px"></div><div class="g3"><div class="sk"></div><div class="sk"></div><div class="sk"></div></div><p class="mu" id="wake" hidden style="margin-top:16px">Waking up the server. The first visit can take up to a minute.</p>`;
+
 /* ---------- views ---------- */
 const mine = id => (S.positions || []).find(p => p.market_id === id);
 function myTag(m) {
@@ -203,12 +281,15 @@ function myTag(m) {
   return `<div class="r" style="gap:8px;margin-top:-4px"><span class="k gt">Your bet</span><span>${esc(side)} NEAR.${esc(res)}</span></div>`;
 }
 const card = r => {
-  const m = r.m, p = pct(m), o = m.st === 'open';
-  return `<div class="c col" style="gap:14px"><div class="sp"><span class="mu">${esc(cap(m.cat))}</span><strong>${esc(stLabel(m))}</strong></div>
-<h3 style="font-size:18px;line-height:1.3;min-height:70px"><a href="#market-${m.id}">${esc(m.q)}</a></h3>${myTag(m)}
-<div class="r" style="gap:8px;align-items:baseline"><strong class="gt" style="font-size:34px;line-height:1">${total(m) > 0 ? p + '%' : '–'}</strong><span class="mu">${total(m) > 0 ? 'chance of yes' : 'no bets yet'}</span></div>${bar(p)}
-<div class="sp"><span class="mu">Pool ${f(total(m))} NEAR</span><span class="mu">Resolved by AI agent</span></div>
-${o ? `<div class="r"><a class="btn yes" data-side="YES" href="#market-${m.id}" style="flex:1">Yes</a><a class="btn no" data-side="NO" href="#market-${m.id}" style="flex:1">No</a></div>` : `<a class="btn sc" href="#market-${m.id}">${m.st === 'resolved' ? 'View resolution' : 'View market'}</a>`}</div>`;
+  const m = r.m, p = pct(m), o = m.st === 'open', has = total(m) > 0, done = m.st === 'resolved';
+  const main = done
+    ? `<div class="r" style="gap:10px;align-items:baseline"><strong class="big ${m.out === 'YES' && !m.refund ? 'gt' : ''}">${m.refund ? 'Refunded' : esc(m.out)}</strong><span class="mu">${m.refund ? 'No bets on one side' : 'Resolved outcome'}</span></div>`
+    : m.st === 'closed' ? `<div style="font-size:24px;font-weight:700;line-height:1.1">Betting closed</div>`
+    : has ? `<div class="r" style="gap:8px;align-items:baseline"><strong class="big gt">${p}%</strong><span class="mu">on YES</span></div>` : `<div style="font-size:22px;font-weight:700;line-height:1.1">Be the first to bet</div>`;
+  return `<div class="c cd">${cover(m)}<div class="cb"><div class="sp"><span class="k">${esc(cap(m.cat))}</span><span class="mu">${esc(m.st === 'open' ? rel(m.closes) : m.st === 'closed' ? 'Closed, awaiting AI agent' : 'Settled')}</span></div>
+<h3 style="font-size:18px;line-height:1.3"><a href="#market-${m.id}">${esc(m.q)}</a></h3>${myTag(m)}${main}${has && !done ? bar(p) : ''}
+${has ? `<span class="mu">Pool ${f(total(m))} NEAR</span>` : ''}
+<div class="push">${o ? `<div class="r"><a class="btn yes" data-side="YES" href="#market-${m.id}" style="flex:1">Yes</a><a class="btn no" data-side="NO" href="#market-${m.id}" style="flex:1">No</a></div>` : `<a class="btn sc" href="#market-${m.id}" style="width:100%">${done ? 'View resolution' : 'View market'}</a>`}</div></div></div>`;
 };
 const section = (title, note, rows) => rows.length ? `<section style="margin-top:32px"><div class="sp" style="align-items:baseline;margin-bottom:14px;flex-wrap:wrap"><h2 style="font-size:22px">${esc(title)} <span class="mu" style="font-size:15px;font-weight:400">${rows.length}</span></h2>${note ? `<span class="mu">${esc(note)}</span>` : ''}</div><div class="g3">${rows.map(card).join('')}</div></section>` : '';
 const grid = () => {
@@ -227,12 +308,25 @@ const grid = () => {
 function errPanel() {
   return `<div class="c col"><h2 style="font-size:20px">Can't reach the Ctrl Predicts API</h2><p class="mu">Tried ${esc(API)}. Error: ${esc(S.err)}</p><p class="mu">Start the API (<code>npm start</code> in the agent folder) or open this page with <code>?api=https://your-api-address</code>.</p><button class="sc" id="retry" style="align-self:flex-start">Try again</button></div>`;
 }
+function featured() {
+  const rows = (S.rows || []).map(r => r.m);
+  const open = rows.filter(m => m.st === 'open').sort((a, b) => total(b) - total(a) || a.closes - b.closes);
+  const m = open[0] || rows.filter(x => x.st === 'resolved').sort((a, b) => b.id - a.id)[0]; if (!m) return '';
+  const has = total(m) > 0, p = pct(m), done = m.st === 'resolved';
+  return `<div class="c cd">${cover(m)}<div class="cb"><div class="sp"><span class="k">${esc(cap(m.cat))}</span><span class="mu">${esc(m.st === 'open' ? rel(m.closes) : 'Settled')}</span></div>
+<h2 style="font-size:20px;line-height:1.3"><a href="#market-${m.id}">${esc(m.q)}</a></h2>
+${done ? `<div class="r" style="gap:10px;align-items:baseline"><strong class="big">${m.refund ? 'Refunded' : esc(m.out)}</strong><span class="mu">Resolved outcome</span></div>` : has ? `<div class="r" style="gap:8px;align-items:baseline"><strong class="big gt">${p}%</strong><span class="mu">on YES</span></div>${bar(p)}` : '<div style="font-size:22px;font-weight:700">Be the first to bet</div>'}
+<a class="btn yes" href="#market-${m.id}">${done ? 'See the evidence' : 'Bet now'}</a></div></div>`;
+}
 function home() {
   if (S.err && !S.rows) { app.innerHTML = errPanel(); return; }
-  if (!S.rows) { app.innerHTML = '<p class="mu">Loading markets…</p>'; return; }
+  if (!S.rows) { app.innerHTML = skeleton(); return; }
   const cats = ['All', ...new Set(['crypto', 'entertainment', 'sports', 'other', ...S.rows.map(r => r.m.cat)])];
-  app.innerHTML = `<h1 style="font-size:clamp(30px,5vw,44px);line-height:1.1">Predict anything.</h1><p class="mu" style="font-size:15px;margin:8px 0 24px">Pick YES or NO. Winners split the pool. An AI agent resolves each market and shows its evidence. Everything runs on NEAR testnet.</p>
-<div class="sp" style="border-bottom:1px solid var(--ln);margin-bottom:20px;flex-wrap:wrap"><div class="r" style="gap:12px">${cats.map(c => `<button class="t" data-cat="${esc(c)}"${c === S.cat ? ' aria-current="true"' : ''}>${esc(cap(c))}</button>`).join('')}</div>
+  const st = S.stats, stat = (k, v) => `<div><div style="font-size:26px;font-weight:700;letter-spacing:-.02em">${v}</div><div class="mu">${k}</div></div>`;
+  app.innerHTML = `<div class="pn"><div class="col" style="gap:18px"><h1 style="font-size:clamp(40px,7vw,72px);line-height:.96;letter-spacing:-.045em">Predict<br>anything.</h1>
+<p class="mu" style="font-size:16px;max-width:28em">Pick YES or NO. Winners split the pool. An AI agent resolves each market and shows its evidence.</p>
+${st ? `<div class="r" style="gap:32px;margin-top:6px">${stat('markets', st.markets_total)}${stat('NEAR traded', f(toNear(st.total_volume)))}${stat('NEAR in fees', f(toNear(st.fees_collected)))}</div>` : ''}</div>${featured()}</div>
+<div class="sp" style="border-bottom:1px solid var(--ln);margin-bottom:8px;flex-wrap:wrap"><div class="r" style="gap:12px">${cats.map(c => `<button class="t" data-cat="${esc(c)}"${c === S.cat ? ' aria-current="true"' : ''}>${esc(cap(c))}</button>`).join('')}</div>
 <label for="q" style="position:absolute;left:-9999px">Search markets</label><input id="q" type="search" placeholder="Search markets" style="width:240px;max-width:100%;margin-bottom:6px"></div><div id="grid">${grid()}</div>`;
   $('q').value = S.q;
 }
@@ -241,13 +335,15 @@ const betPanel = m => `<div class="c col"><div class="r"><button class="yes" id=
 <div class="col" id="quote" style="gap:6px"></div><button id="go" style="min-height:48px"></button><p class="mu" id="err" role="alert"></p>
 <p class="mu">The payout is an estimate and changes as more bets come in. If nobody bets on the other side, you get your stake back.</p></div>`;
 function resPanel(m, res) {
-  if (!res) return `<div class="c col"><h2 style="font-size:22px">Resolved ${esc(m.out)}</h2><p class="mu">The evidence is still loading.</p></div>`;
+  if (!res) return `<div class="ev"><h2 style="font-size:24px">Outcome: ${esc(m.out)}</h2><p class="mu">The evidence is still loading.</p><p class="mu">Evidence hash recorded on-chain: <code style="word-break:break-all">${esc(m.hash || '')}</code></p></div>`;
   const d = res.data, rule = res.method === 'rule';
-  return `<div class="c col" style="gap:14px"><span class="env" style="align-self:flex-start">${rule ? 'Settled by a fixed rule on price data' : 'Resolved by AI agent'}</span>
-<h2 style="font-size:24px">Outcome: ${esc(res.outcome)}</h2><p>${esc(res.reasoning)}</p>
+  const chips = (res.sources || []).map(s => { const u = safeUrl(s.url); return u ? `<a class="sch" href="${u}" target="_blank" rel="noopener noreferrer">${esc(s.title)}</a>` : `<span class="sch">${esc(s.title)}</span>`; }).join('');
+  return `<div class="ev"><span class="env" style="align-self:flex-start">${rule ? 'Settled by a fixed rule on price data' : 'Resolved by AI agent'}</span>
+<h2 style="font-size:clamp(28px,5vw,40px);letter-spacing:-.03em;line-height:1">Outcome: ${esc(res.outcome)}</h2><p style="font-size:17px">${esc(res.reasoning)}</p>
 ${d ? `<p class="mu">Price used: $${esc(f(d.price_usd))} at ${esc(new Date(d.observed_at).toUTCString())} (${esc(d.source)})</p>` : ''}
-<p class="mu">Sources</p>${sourcesList(res.sources)}
-<p class="mu">Evidence hash recorded on-chain: <code style="word-break:break-all">${esc(res.evidence_hash)}</code></p>
+${chips ? `<div class="r" style="gap:8px">${chips}</div>` : ''}
+<div class="col" style="gap:8px;border-top:1px solid #2f2f2f;padding-top:14px"><span class="mu">Evidence hash recorded on-chain</span><code style="word-break:break-all;font-size:13px">${esc(res.evidence_hash)}</code>
+<button class="sc" data-copy="${esc(res.evidence_hash)}" style="align-self:flex-start;color:#fff;border-color:#6B6B6B;min-height:40px">Copy hash</button></div>
 <p class="mu">Resolved ${esc(new Date(res.resolved_at).toUTCString())}. Fee taken: ${f(toNear(m.feePaid))} NEAR.</p></div>`;
 }
 function claimBox(m) {
@@ -262,7 +358,7 @@ function claimBox(m) {
 async function detail(id) {
   const r = (S.rows || []).find(x => x.m.id === id);
   if (!r && S.err) { app.innerHTML = errPanel(); return; }
-  app.innerHTML = '<p class="mu">Loading market…</p>';
+  app.innerHTML = '<div class="sk" style="min-height:420px"></div>';
   let d;
   try { d = await api('/api/entries/' + id); } catch (e) { app.innerHTML = `<p><a href="#markets" class="mu">Back to markets</a></p><p>Could not load this market: ${esc(e.message)}</p>`; return; }
   if (location.hash.slice(1) !== 'market-' + id) return;
@@ -270,11 +366,11 @@ async function detail(id) {
   const p = pct(m), o = m.st === 'open';
   if (S.positions == null && S.account) await loadPositions();
   const articleHtml = a ? `<div class="c col" style="gap:10px"><div class="sp"><h3 style="font-size:18px">${esc(a.title)}</h3><span class="env">AI-written</span></div><p>${esc(a.summary)}</p>${md(a.body_md)}<p class="mu">Sources</p>${sourcesList(a.sources)}<p class="mu">Written ${esc(new Date(a.updated_at).toUTCString())} by ${esc(a.model)}</p></div>` : '<div class="c"><p class="mu">The AI agent is still writing this entry. Check back in a minute.</p></div>';
-  const side = o ? betPanel(m) : m.st === 'resolved' ? resPanel(m, d.resolution) + claimBox(m) : '<div class="c col"><h2 style="font-size:22px">Betting is closed</h2><p class="mu">The AI agent is gathering evidence and will resolve this market shortly. This page updates when it does.</p></div>';
+  const side = o ? betPanel(m) : m.st === 'resolved' ? claimBox(m) : '<div class="c col"><h2 style="font-size:22px">Betting is closed</h2><p class="mu">The AI agent is gathering evidence and will resolve this market shortly. This page updates when it does.</p></div>';
   app.innerHTML = `<p><a href="#markets" class="mu">Back to markets</a></p><div class="two" style="margin-top:12px"><div class="col" style="gap:14px;min-width:0">
-<div class="r"><span class="mu">${esc(cap(m.cat))}</span><strong>${esc(stLabel(m))}</strong></div><h1 style="font-size:clamp(24px,4vw,32px);line-height:1.2">${esc(m.q)}</h1>
+<div style="border-radius:16px;overflow:hidden">${cover(m)}</div><div class="r"><span class="k">${esc(cap(m.cat))}</span><strong>${esc(stLabel(m))}</strong></div><h1 style="font-size:clamp(26px,4.4vw,38px);line-height:1.15;letter-spacing:-.02em">${esc(m.q)}</h1>
 <div class="c col" style="gap:10px"><div class="sp"><strong style="font-size:30px">${total(m) > 0 ? p + '% YES' : 'No bets yet'}</strong><span class="mu">Market odds</span></div>${bar(p)}<div class="sp"><span>YES pool <strong class="gt">${f(m.y)} NEAR</strong></span><span>NO pool <strong>${f(m.n)} NEAR</strong></span></div></div>
-${articleHtml}</div><div class="col">${side}</div></div>`;
+${m.st === 'resolved' ? resPanel(m, d.resolution) : ''}${articleHtml}</div><div class="col sticky">${side}</div></div>`;
   if (o) quote();
 }
 function quote() {
@@ -346,6 +442,7 @@ function route() {
 addEventListener('hashchange', route);
 document.addEventListener('click', e => {
   const t = e.target.closest('button,a'); if (!t) return;
+  if (t.dataset.copy) { try { navigator.clipboard.writeText(t.dataset.copy).then(() => { t.textContent = 'Copied'; }, () => { t.textContent = 'Copy failed'; }); } catch { t.textContent = 'Copy failed'; } return; }
   if (t.dataset.side) S.side = t.dataset.side;
   if (t.dataset.cat) { S.cat = t.dataset.cat; home(); return; }
   if (t.id === 'sy' || t.id === 'sn') { S.side = t.id === 'sy' ? 'YES' : 'NO'; quote(); }
@@ -363,6 +460,8 @@ $('foot').textContent = 'Contract ' + CONTRACT + ' on NEAR testnet. API: ' + API
 $('ct').href = EXPLORER + '/address/' + CONTRACT;
 if (X_URL) { for (const id of ['xh', 'xf']) { $(id).href = X_URL; $(id).hidden = false; } }
 hdr();
+setTimeout(() => { const w = $('wake'); if (w && !S.rows) w.hidden = false; }, 4000);
+if (!location.hash || location.hash === '#markets') route();
 await loadList(); route();
 restoreWallet();
 setInterval(async () => { const h = location.hash.slice(1) || 'markets'; if (h === 'markets' && document.activeElement?.id !== 'q') { await loadList(); if (S.rows) home(); } }, 30000);
