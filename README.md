@@ -4,8 +4,10 @@
 
 Built for **NEAR HACKATHON** (track: Agent Economy). Runs on **NEAR testnet only. No real funds.**
 
-- Contract on testnet: `ctrlpredicts.testnet`
-- Demo on X: https://x.com/ctrl_predicts
+- **Live site:** https://ctrl-predicts.netlify.app
+- **Demo video:** https://x.com/ctrl_predicts/status/2121161936813293954
+- **X:** https://x.com/ctrl_predicts
+- **Contract on testnet:** `ctrlpredicts.testnet` (https://testnet.nearblocks.io/address/ctrlpredicts.testnet)
 
 ## What it does
 
@@ -16,6 +18,19 @@ Built for **NEAR HACKATHON** (track: Agent Economy). Runs on **NEAR testnet only
 - **Revenue model (visible on testnet):** a 2% fee on the pool at resolution. 70% goes to the treasury, 30% is paid to the resolver agent immediately.
 
 ## Try it (do X, see Y)
+
+### Fastest way: the live site (no install)
+
+1. **Do:** open https://ctrl-predicts.netlify.app and click **Launch app**.
+   **See:** markets grouped into Active, Awaiting the AI agent and Resolved. The first load can take up to a minute while the free API server wakes up.
+2. **Do:** click **Connect wallet** and pick a NEAR testnet account.
+   **See:** your account and testnet balance in the header.
+3. **Do:** open an active market, enter an amount and click YES or NO, then confirm in your wallet.
+   **See:** "Bet placed" with a transaction link, and the market moves to "Your active bets".
+4. **Do:** open a resolved market.
+   **See:** the outcome, the agent's reasoning, its sources and the evidence hash.
+
+### Run it yourself
 
 You need Node 20+ and a NEAR testnet wallet (for example a HOT or MyNearWallet testnet account, funded from the testnet faucet).
 
