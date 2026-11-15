@@ -2,9 +2,41 @@ import { Account, JsonRpcProvider, KeyPairSigner, teraToGas } from 'near-api-js'
 import { cfg } from './config.js';
 
 const provider = new JsonRpcProvider({ url: cfg.rpcUrl });
+// Extra read endpoints tried when the main one is rate limited (comma-separated RPC_FALLBACKS in .env).
+const FALLBACKS = (process.env.RPC_FALLBACKS || 'https://rpc.testnet.near.org,https://near-testnet.drpc.org')
+  .split(',').map((u) => u.trim()).filter(Boolean);
+const providers = [provider, ...FALLBACKS.map((url) => new JsonRpcProvider({ url }))];
 
-export async function view(method, args = {}) {
-  return provider.callFunction({ contractId: cfg.contractId, method, args });
+// Reads are cached for a few seconds and shared between simultaneous callers,
+// so page loads and the agent loop do not burn the free RPC rate limit.
+const TTL_MS = 8000;
+const cache = new Map();
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function readWithFailover(method, args) {
+  let lastErr;
+  for (let round = 0; round < 2; round++) {
+    for (const p of providers) {
+      try {
+        return await p.callFunction({ contractId: cfg.contractId, method, args });
+      } catch (e) {
+        lastErr = e;
+        if (!/429|rate limit|fetch failed|timeout|ECONN|ENOTFOUND|503|502/i.test(String(e?.message || e))) throw e;
+      }
+    }
+    await sleep(600);
+  }
+  throw lastErr;
+}
+
+export function view(method, args = {}) {
+  const key = method + JSON.stringify(args);
+  const hit = cache.get(key);
+  if (hit && Date.now() - hit.at < TTL_MS) return hit.p;
+  const p = readWithFailover(method, args);
+  cache.set(key, { at: Date.now(), p });
+  p.catch(() => cache.delete(key));
+  return p;
 }
 
 function accountFor(id, key) {
